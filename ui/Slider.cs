@@ -1,0 +1,98 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using StardewValley;
+using StardewValley.Menus;
+using System;
+
+namespace ichortower.ui
+{
+    public class Slider : Widget
+    {
+        public static int defaultWidth = 201;
+        public static int defaultHeight = 20;
+
+        public int[] Range = new int[2] {-100, 100};
+        private int _value;
+        public int Value
+        {
+            get => _value;
+            set {
+                _value = Math.Max(Range[0], Math.Min(value, Range[1]));
+            }
+        }
+
+        public Func<string> ValueDelegate = null;
+
+        public Slider(IClickableMenu parent, int xpos, int ypos, int initial)
+            : this(parent, new Rectangle(xpos, ypos, Slider.defaultWidth, Slider.defaultHeight),
+                    initial)
+        {
+        }
+
+        public Slider(IClickableMenu parent, Rectangle bounds, int initial, int[] range = null)
+            : base(parent)
+        {
+            if (range != null && range.Length > 1) {
+                this.Range = new int[2] {range[0], range[1]};
+            }
+            this.Value = initial;
+            this.Bounds = bounds; 
+        }
+
+        public override void draw(SpriteBatch b)
+        {
+            Rectangle screenb = new(
+                    (this.parent?.xPositionOnScreen ?? 0) + this.Bounds.X,
+                    (this.parent?.yPositionOnScreen ?? 0) + this.Bounds.Y,
+                    this.Bounds.Width, this.Bounds.Height);
+            b.Draw(Game1.mouseCursors, color: Color.White,
+                    sourceRectangle: new Rectangle(228, 425, 6, 2),
+                    destinationRectangle: new Rectangle(screenb.X, screenb.Center.Y - 2, screenb.Width, 2));
+            b.Draw(Game1.mouseCursors, color: Color.White,
+                    sourceRectangle: new Rectangle(228, 425, 6, 2),
+                    destinationRectangle: new Rectangle(screenb.X, screenb.Center.Y, screenb.Width, 2),
+                    effects: SpriteEffects.FlipVertically,
+                    rotation: 0f, origin: Vector2.Zero, layerDepth: 0f);
+            int dist = (int)((float)(this.Value-this.Range[0]) /
+                    (float)(this.Range[1]-this.Range[0]) * screenb.Width);
+            int boxX = InHoverState ? 267 : 256;
+            b.Draw(Game1.mouseCursors, color: Color.White,
+                    sourceRectangle: new Rectangle(boxX, 256, 3, 10),
+                    destinationRectangle: new Rectangle(screenb.X + dist - 6, screenb.Y, 6, 20));
+            b.Draw(Game1.mouseCursors, color: Color.White,
+                    sourceRectangle: new Rectangle(boxX+7, 256, 3, 10),
+                    destinationRectangle: new Rectangle(screenb.X + dist, screenb.Y, 6, 20));
+            string disp = this.ValueDelegate?.Invoke() ?? $"{this.Value}";
+            Utility.drawTextWithShadow(b, disp, Game1.smallFont,
+                    new Vector2(screenb.X + screenb.Width + 4, screenb.Y - 4),
+                    Game1.textColor);
+        }
+
+        public override void click(int x, int y, bool playSound = true)
+        {
+            this.Value = (int)Utility.Lerp(Range[0], Range[1],
+                    (float)(x-Bounds.X) / (float)Bounds.Width);
+        }
+
+        public override void clickHold(int x, int y)
+        {
+            this.click(x, y);
+        }
+
+        public override void keyPress(Keys key)
+        {
+            if (Game1.options.doesInputListContain(Game1.options.moveRightButton, key)) {
+                this.Value += 1;
+            }
+            else if (Game1.options.doesInputListContain(Game1.options.moveLeftButton, key)) {
+                this.Value -= 1;
+            }
+        }
+
+        public string RenderAsFloat()
+        {
+            return string.Format("{0:0.00}", (float)Value/100f);
+        }
+    }
+}

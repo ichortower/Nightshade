@@ -1,0 +1,11 @@
+{
+	"Name": "Nightshade",
+	"Author": "ichortower",
+	"Description": "Adds configurable pixel shaders to recolor the game and add a depth-of-field effect.",
+	"Version": "1.0.0-beta",
+	"UniqueID": "ichortower.Nightshade",
+	"EntryDll": "Nightshade.dll",
+	"MinimumApiVersion": "4.0.0",
+	"UpdateKeys": ["Nexus:-1"],
+	"Dependencies": []
+}

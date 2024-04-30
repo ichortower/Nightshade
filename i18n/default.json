@@ -1,0 +1,29 @@
+{
+  "menu.EnableColorizer.Text": "Colorizer",
+  "menu.ColorizeBySeason.Text": "By Season",
+  "menu.ColorizeBySeason.Hover": "When enabled, the four profiles will be used automatically for Spring, Summer, Fall, and Winter, respectively.",
+  "menu.ActiveProfile.Text": "Active Profile",
+  "menu.ActiveProfile.Hover": "When By Season is disabled, use this profile. Ignored if By Season is enabled.",
+
+  "menu.Saturation.Text": "Saturation",
+  "menu.Lightness.Text": "Lightness",
+  "menu.Contrast.Text": "Contrast",
+
+  "menu.ColorBalance.Hover": "Adjust color balance. In each color group (cyan-red, magenta-green, and yellow-blue), the three sliders control shadows, midtones, and highlights, respectively.",
+
+  "menu.RevertButton.Hover": "Revert^Reset all color sliders to the state they were in when you loaded this profile.",
+  "menu.ClearButton.Hover": "Clear^Reset all color sliders to zero.",
+  "menu.CopyButton.Hover": "Copy^Copy the state of the color sliders.",
+  "menu.PasteButton.Hover": "Paste^Paste the state of the color sliders.",
+  "menu.PreviewToggle.Hover": "Preview^When active, applies the current state of the color sliders (toggle this to swap between your starting state and current settings).",
+
+  "menu.EnableDepthOfField.Text": "Depth of Field",
+  "menu.Field.Text": "Field",
+  "menu.Field.Hover": "How deep the field is: i.e. how much of the screen is fully in focus (no blur).",
+  "menu.Ramp.Text": "Ramp",
+  "menu.Ramp.Hover": "How slowly the blur increases to full intensity once leaving the field. Higher values are slower.",
+  "menu.Intensity.Text": "Intensity",
+  "menu.Intensity.Hover": "How powerful the blur effect is (at maximum).",
+
+  "EOF": ""
+}
