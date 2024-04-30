@@ -34,6 +34,10 @@ namespace ichortower
         public float HighlightR = 0f;
         public float HighlightG = 0f;
         public float HighlightB = 0f;
+
+        public ColorizerPreset Clone() {
+            return (ColorizerPreset) this.MemberwiseClone();
+        }
     }
 
     public sealed class DepthOfFieldPreset

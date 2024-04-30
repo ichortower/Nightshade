@@ -24,6 +24,13 @@ namespace ichortower.ui
         private Widget heldChild = null;
         private Widget keyedChild = null;
 
+        private ColorizerPreset[] ColorizerInitialStates = new ColorizerPreset[4] {
+            new(), new(), new(), new()
+        };
+        private ColorizerPreset[] ColorizerActiveStates = new ColorizerPreset[4] {
+            new(), new(), new(), new()
+        };
+
         public ShaderMenu()
             : this(defaultX, defaultY)
         {
@@ -35,6 +42,9 @@ namespace ichortower.ui
             LoadIcons();
             AddChildWidgets();
             LoadCurrentSettings();
+            exitFunction = delegate {
+                Nightshade.instance.ApplyConfig(Nightshade.Config);
+            };
         }
 
         public static void LoadIcons()
@@ -63,7 +73,7 @@ namespace ichortower.ui
             y += chk_colorBySeason.Bounds.Height + 16;
             var tbr_profiles = new TabBar(
                     new Rectangle(4, y, defaultWidth-8, 39),
-                    new string[] {"Spring", "Summer", "Fall", "Winter"},
+                    new string[] {" 1 ", " 2 ", " 3 ", " 4 "},
                     parent: this);
             seasonSwitcher = tbr_profiles;
             y += tbr_profiles.Bounds.Height + 16;
@@ -210,8 +220,20 @@ namespace ichortower.ui
                     }
                 }
             }
-            LoadColorizerPreset(Nightshade.Config.ColorizerProfiles[0]);
+            for (int i = 0; i < ColorizerInitialStates.Length; ++i) {
+                ColorizerInitialStates[i] = Nightshade.Config.ColorizerProfiles[i].Clone();
+                ColorizerActiveStates[i] = ColorizerInitialStates[i].Clone();
+            }
+            setSwitcherLabels();
+            if (bySeasonToggle.Value) {
+                seasonSwitcher.FocusedIndex = Game1.seasonIndex;
+            }
+            else {
+                seasonSwitcher.FocusedIndex = Nightshade.Config.ColorizerActiveProfile;
+            }
+            LoadColorizerPreset(ColorizerInitialStates[seasonSwitcher.FocusedIndex]);
             LoadDepthOfFieldPreset(Nightshade.Config.DepthOfFieldSettings);
+
         }
 
         public void LoadColorizerPreset(ColorizerPreset set)
@@ -362,18 +384,97 @@ namespace ichortower.ui
         public void onChildChange(Widget child)
         {
             if (child == bySeasonToggle) {
-                if ((child as Checkbox).Value) {
-                    seasonSwitcher.Labels = new string[] {
-                        "Spring", "Summer", "Fall", "Winter"
-                    };
-                }
-                else {
-                    seasonSwitcher.Labels = new string[] {
-                        " 1 ", " 2 ", " 3 ", " 4 "
-                    };
+                setSwitcherLabels();
+                return;
+            }
+            if (child == seasonSwitcher) {
+                LoadColorizerPreset(ColorizerActiveStates[seasonSwitcher.FocusedIndex]);
+            }
+            ColorizerPreset current = ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+            foreach (var ch in this.children) {
+                if (ch is Slider sl) {
+                    switch (sl.Name) {
+                    case "Saturation":
+                        current.Saturation = sl.Value / 100f;
+                        break;
+                    case "Lightness":
+                        current.Lightness = sl.Value / 100f;
+                        break;
+                    case "Contrast":
+                        current.Contrast = sl.Value / 100f;
+                        break;
+                    case "ShadowR":
+                        current.ShadowR = sl.Value / 100f;
+                        break;
+                    case "ShadowG":
+                        current.ShadowG = sl.Value / 100f;
+                        break;
+                    case "ShadowB":
+                        current.ShadowB = sl.Value / 100f;
+                        break;
+                    case "MidtoneR":
+                        current.MidtoneR = sl.Value / 100f;
+                        break;
+                    case "MidtoneG":
+                        current.MidtoneG = sl.Value / 100f;
+                        break;
+                    case "MidtoneB":
+                        current.MidtoneB = sl.Value / 100f;
+                        break;
+                    case "HighlightR":
+                        current.HighlightR = sl.Value / 100f;
+                        break;
+                    case "HighlightG":
+                        current.HighlightG = sl.Value / 100f;
+                        break;
+                    case "HighlightB":
+                        current.HighlightB = sl.Value / 100f;
+                        break;
+                    }
                 }
             }
-            else if (child == seasonSwitcher) {
+            ModConfig built = new();
+            foreach (var ch in this.children) {
+                switch (ch.Name) {
+                case "ColorizerEnabled":
+                    built.ColorizerEnabled = (ch as Checkbox).Value;
+                    break;
+                case "DepthOfFieldEnabled":
+                    built.DepthOfFieldEnabled = (ch as Checkbox).Value;
+                    break;
+                case "Field":
+                    built.DepthOfFieldSettings.Field = (ch as Slider).Value;
+                    break;
+                case "Ramp":
+                    built.DepthOfFieldSettings.Ramp = (ch as Slider).Value;
+                    break;
+                case "Intensity":
+                    built.DepthOfFieldSettings.Intensity = (ch as Slider).Value;
+                    break;
+                }
+            }
+            // TODO use initial state if missing toggle is off
+            for (int i = 0; i < ColorizerActiveStates.Length; ++i) {
+                built.ColorizerProfiles[i] = ColorizerActiveStates[i].Clone();
+            }
+            built.ColorizeBySeason = bySeasonToggle.Value;
+            built.ColorizerActiveProfile = seasonSwitcher.FocusedIndex;
+            Nightshade.instance.ApplyConfig(built);
+        }
+
+        private void setSwitcherLabels()
+        {
+            if (bySeasonToggle.Value) {
+                string pf = "Strings\\StringsFromCSFiles";
+                seasonSwitcher.Labels = new string[] {
+                    Utility.capitalizeFirstLetter(Game1.content.LoadString(pf+":spring")),
+                    Utility.capitalizeFirstLetter(Game1.content.LoadString(pf+":summer")),
+                    Utility.capitalizeFirstLetter(Game1.content.LoadString(pf+":fall")),
+                    Utility.capitalizeFirstLetter(Game1.content.LoadString(pf+":winter")),
+                };
+            }
+            else {
+                seasonSwitcher.Labels = new string[] {" 1 ", " 2 ", " 3 ", " 4 "};
             }
         }
 

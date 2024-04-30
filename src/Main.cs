@@ -6,6 +6,7 @@ using StardewValley;
 using StardewValley.Mods;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Enums;
 using System;
 using System.IO;
 using System.Reflection;
@@ -22,6 +23,8 @@ namespace ichortower
 
         private static RenderTarget2D uiScreen = null;
         private static RenderTarget2D sceneScreen = null;
+        private static bool usingColorizer = false;
+        private static bool usingDepthOfField = false;
 
         public static ModConfig Config;
 
@@ -46,17 +49,7 @@ namespace ichortower
                 return;
             }
             Nightshade.Config = helper.ReadConfig<ModConfig>();
-
-            //InShade.ColorShader.Parameters["Saturation"].SetValue((float)-.3);
-            //InShade.ColorShader.Parameters["Lightness"].SetValue((float).5);
-            //InShade.ColorShader.Parameters["Contrast"].SetValue((float)-.2);
-            //InShade.ColorShader.Parameters["ShadowRgb"].SetValue(new Vector3(-.1f, 0f, .1f));
-            //InShade.ColorShader.Parameters["MidtoneRgb"].SetValue(new Vector3(-.1f, 0f, .1f));
-            //InShade.ColorShader.Parameters["HighlightRgb"].SetValue(new Vector3(-.1f, 0f, .1f));
-            //InShade.DofShader.Parameters["Field"].SetValue(0.6f);
-            //InShade.DofShader.Parameters["Ramp"].SetValue(0.16f);
-            //InShade.DofShader.Parameters["Intensity"].SetValue(6.0f);
-            //InShade.DofShader.Parameters["Center"].SetValue(0.5f);
+            ApplyConfig(Nightshade.Config);
 
             var harmony = new Harmony(this.ModManifest.UniqueID);
             MethodInfo Game1_ShouldDrawOnBuffer = typeof(Game1).GetMethod(
@@ -90,16 +83,48 @@ namespace ichortower
             harmony.Patch(target, postfix: Postfix);
             */
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+            helper.Events.Specialized.LoadStageChanged += this.OnLoadStageChanged;
             helper.Events.Display.Rendered += this.OnRendered;
-            //helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
+            helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Content.AssetReady += this.OnAssetReady;
         }
 
+        public void ApplyConfig(ModConfig conf)
+        {
+            int index = conf.ColorizerActiveProfile;
+            if (conf.ColorizeBySeason) {
+                index = Game1.seasonIndex;
+            }
+            ColorizerPreset active = conf.ColorizerProfiles[index];
+            ColorShader.Parameters["Saturation"].SetValue(active.Saturation);
+            ColorShader.Parameters["Lightness"].SetValue(active.Lightness);
+            ColorShader.Parameters["Contrast"].SetValue(active.Contrast);
+            ColorShader.Parameters["ShadowRgb"].SetValue(new Vector3(
+                    active.ShadowR, active.ShadowG, active.ShadowB));
+            ColorShader.Parameters["MidtoneRgb"].SetValue(new Vector3(
+                    active.MidtoneR, active.MidtoneG, active.MidtoneB));
+            ColorShader.Parameters["HighlightRgb"].SetValue(new Vector3(
+                    active.HighlightR, active.HighlightG, active.HighlightB));
+            DofShader.Parameters["Field"].SetValue(conf.DepthOfFieldSettings.Field);
+            DofShader.Parameters["Ramp"].SetValue(conf.DepthOfFieldSettings.Ramp);
+            DofShader.Parameters["Intensity"].SetValue(conf.DepthOfFieldSettings.Intensity);
+
+            usingColorizer = conf.ColorizerEnabled;
+            usingDepthOfField = conf.DepthOfFieldEnabled;
+        }
+
         public void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             GMCMIntegration.Setup();
+        }
+
+        public void OnLoadStageChanged(object sender, LoadStageChangedEventArgs e)
+        {
+            if (e.NewStage == LoadStage.Preloaded) {
+                ApplyConfig(Nightshade.Config);
+            }
         }
 
         public void OnAssetRequested(object sender, AssetRequestedEventArgs e)
@@ -139,6 +164,9 @@ namespace ichortower
         [EventPriority(EventPriority.Low - 10)]
         public void OnRendered(object sender, RenderedEventArgs e)
         {
+            if (!usingColorizer) {
+                return;
+            }
             EnsureBuffers();
             // call End/Begin to flush any pending draws in the spritebatch.
             // otherwise, they won't be drawn until after our shader.
@@ -208,6 +236,9 @@ namespace ichortower
         [EventPriority(EventPriority.Low - 10)]
         public void OnRenderedWorld(object sender, RenderedWorldEventArgs e)
         {
+            if (!usingDepthOfField) {
+                return;
+            }
             EnsureBuffers();
             e.SpriteBatch.End();
             e.SpriteBatch.Begin(SpriteSortMode.Deferred,

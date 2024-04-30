@@ -72,8 +72,12 @@ namespace ichortower.ui
 
         public override void click(int x, int y, bool playSound = true)
         {
+            int prev = this.Value;
             this.Value = (int)Utility.Lerp(Range[0], Range[1],
                     (float)(x-Bounds.X) / (float)Bounds.Width);
+            if (prev != this.Value && this.parent is ShaderMenu m) {
+                m.onChildChange(this);
+            }
         }
 
         public override void clickHold(int x, int y)
