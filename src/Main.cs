@@ -267,11 +267,9 @@ namespace ichortower
             if (Game1.activeClickableMenu != null) {
                 return;
             }
-            foreach (var button in e.Pressed) {
-                if (button == SButton.H) {
-                    ui.ShaderMenu cfg = new();
-                    Game1.activeClickableMenu = cfg;
-                }
+            if (Config.MenuKeybind.JustPressed()) {
+                ui.ShaderMenu cfg = new();
+                Game1.activeClickableMenu = cfg;
             }
         }
 
