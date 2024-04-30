@@ -24,20 +24,21 @@ namespace ichortower.ui
 
         public Func<int, string> ValueDelegate = null;
 
-        public Slider(IClickableMenu parent, int xpos, int ypos, int initial)
+        public Slider(IClickableMenu parent, int xpos, int ypos,
+                string name = "", int initial = 0)
             : this(parent, new Rectangle(xpos, ypos, Slider.defaultWidth, Slider.defaultHeight),
-                    initial)
+                    name, initial)
         {
         }
 
-        public Slider(IClickableMenu parent, Rectangle bounds, int initial, int[] range = null)
-            : base(parent)
+        public Slider(IClickableMenu parent, Rectangle bounds,
+                string name = "", int initial = 0, int[] range = null)
+            : base(parent, bounds, name)
         {
             if (range != null && range.Length > 1) {
                 this.Range = new int[2] {range[0], range[1]};
             }
             this.Value = initial;
-            this.Bounds = bounds; 
         }
 
         public override void draw(SpriteBatch b)

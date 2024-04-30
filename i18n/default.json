@@ -1,6 +1,6 @@
 {
   "menu.EnableColorizer.Text": "Colorizer",
-  "menu.ColorizeBySeason.Text": "By Season",
+  "menu.ColorizeBySeason.Text": "Colorize By Season",
   "menu.ColorizeBySeason.Hover": "When enabled, the four profiles will be used automatically for Spring, Summer, Fall, and Winter, respectively.",
   "menu.ActiveProfile.Text": "Active Profile",
   "menu.ActiveProfile.Hover": "When By Season is disabled, use this profile. Ignored if By Season is enabled.",

@@ -11,6 +11,7 @@ namespace ichortower.ui
     {
         protected IClickableMenu parent;
         public Rectangle Bounds;
+        public string Name = "";
         public string HoverText;
         public bool InHoverState = false;
         public bool InActiveState = false;
@@ -24,6 +25,13 @@ namespace ichortower.ui
         {
             this.parent = parent;
             this.Bounds = bounds;
+        }
+
+        public Widget(IClickableMenu parent, Rectangle bounds, string name)
+        {
+            this.parent = parent;
+            this.Bounds = bounds;
+            this.Name = name;
         }
 
         public virtual void draw(SpriteBatch b)

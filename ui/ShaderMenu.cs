@@ -17,6 +17,9 @@ namespace ichortower.ui
         public static Texture2D IconTexture = null;
 
         private List<Widget> children = new();
+        // references to the two child widgets that have interop
+        private Checkbox bySeasonToggle = null;
+        private TabBar seasonSwitcher = null;
 
         private Widget heldChild = null;
         private Widget keyedChild = null;
@@ -31,6 +34,7 @@ namespace ichortower.ui
         {
             LoadIcons();
             AddChildWidgets();
+            LoadCurrentSettings();
         }
 
         public static void LoadIcons()
@@ -43,13 +47,14 @@ namespace ichortower.ui
             int y = 20;
             // give labels the same height (27) as checkboxes so they line up
             // vertically (default valign is center)
-            var chk_enableColorizer = new Checkbox(20, y, this, false);
+            var chk_enableColorizer = new Checkbox(this, 20, y, "ColorizerEnabled");
             var lbl_enableColorizer = new Label(this,
                     new Rectangle(56, y, 0, 27),
                     text: TR.Get("menu.EnableColorizer.Text"),
                     activate: chk_enableColorizer);
             y += chk_enableColorizer.Bounds.Height + 8;
-            var chk_colorBySeason = new Checkbox(20, y, this, false);
+            var chk_colorBySeason = new Checkbox(this, 20, y, "ColorizeBySeason");
+            bySeasonToggle = chk_colorBySeason;
             var lbl_colorBySeason = new Label(this,
                     new Rectangle(56, y, 0, 27),
                     text: TR.Get("menu.ColorizeBySeason.Text"),
@@ -60,23 +65,24 @@ namespace ichortower.ui
                     new Rectangle(4, y, defaultWidth-8, 39),
                     new string[] {"Spring", "Summer", "Fall", "Winter"},
                     parent: this);
+            seasonSwitcher = tbr_profiles;
             y += tbr_profiles.Bounds.Height + 16;
             // same as before, give labels the same height (20) as the sliders.
             // this makes the labels render "too high" but it lines up
             var lbl_saturation = new Label(this,
                     new Rectangle(20, y, 128, 20),
                     text: TR.Get("menu.Saturation.Text"));
-            var sld_saturation = new Slider(this, 156, y, 0);
+            var sld_saturation = new Slider(this, 156, y, name: "Saturation");
             y += lbl_saturation.Bounds.Height + 8;
             var lbl_lightness = new Label(this,
                     new Rectangle(20, y, 128, 20),
                     text: TR.Get("menu.Lightness.Text"));
-            var sld_lightness = new Slider(this, 156, y, 0);
+            var sld_lightness = new Slider(this, 156, y, name: "Lightness");
             y += lbl_lightness.Bounds.Height + 8;
             var lbl_contrast = new Label(this,
                     new Rectangle(20, y, 128, 20),
                     text: TR.Get("menu.Contrast.Text"));
-            var sld_contrast = new Slider(this, 156, y, 0);
+            var sld_contrast = new Slider(this, 156, y, name: "Contrast");
             y += lbl_contrast.Bounds.Height + 16;
 
             int buttonY = y;
@@ -86,25 +92,25 @@ namespace ichortower.ui
                     text: "C", hoverText: colorBalance);
             var lbl_red = new Label(this, new Rectangle(296, y, 24, 60),
                     text: "R", hoverText: colorBalance);
-            var sld_redShadow = new Slider(this, 48, y, 0);
-            var sld_redMidtone = new Slider(this, 48, y+20, 0);
-            var sld_redHighlight = new Slider(this, 48, y+40, 0);
+            var sld_redShadow = new Slider(this, 48, y, name: "ShadowR");
+            var sld_redMidtone = new Slider(this, 48, y+20, name: "MidtoneR");
+            var sld_redHighlight = new Slider(this, 48, y+40, name: "HighlightR");
             y += 60 + 8;
             var lbl_magenta = new Label(this, new Rectangle(20, y, 24, 60),
                     text: "M", hoverText: colorBalance);
             var lbl_green = new Label(this, new Rectangle(296, y, 24, 60),
                     text: "G", hoverText: colorBalance);
-            var sld_greenShadow = new Slider(this, 48, y, 0);
-            var sld_greenMidtone = new Slider(this, 48, y+20, 0);
-            var sld_greenHighlight = new Slider(this, 48, y+40, 0);
+            var sld_greenShadow = new Slider(this, 48, y, name: "ShadowG");
+            var sld_greenMidtone = new Slider(this, 48, y+20, name: "MidtoneG");
+            var sld_greenHighlight = new Slider(this, 48, y+40, name: "HighlightG");
             y += 60 + 8;
             var lbl_yellow = new Label(this, new Rectangle(20, y, 24, 60),
                     text: "Y", hoverText: colorBalance);
             var lbl_blue = new Label(this, new Rectangle(296, y, 24, 60),
                     text: "B", hoverText: colorBalance);
-            var sld_blueShadow = new Slider(this, 48, y, 0);
-            var sld_blueMidtone = new Slider(this, 48, y+20, 0);
-            var sld_blueHighlight = new Slider(this, 48, y+40, 0);
+            var sld_blueShadow = new Slider(this, 48, y, name: "ShadowB");
+            var sld_blueMidtone = new Slider(this, 48, y+20, name: "MidtoneB");
+            var sld_blueHighlight = new Slider(this, 48, y+40, name: "HighlightB");
             y += 60 + 16;
             var tbr_separator = new TabBar(
                     new Rectangle(4, y, defaultWidth-8, 2),
@@ -128,7 +134,7 @@ namespace ichortower.ui
                     onClick: PasteCurrentProfile);
             buttonY += IconButton.defaultHeight + 8;
 
-            var chk_enableDepthOfField = new Checkbox(20, y, this, false);
+            var chk_enableDepthOfField = new Checkbox(this, 20, y, "DepthOfFieldEnabled");
             var lbl_enableDepthOfField = new Label(this,
                     new Rectangle(56, y, 0, 27),
                     text: TR.Get("menu.EnableDepthOfField.Text"),
@@ -138,26 +144,30 @@ namespace ichortower.ui
                     new Rectangle(20, y, 96, 20),
                     text: TR.Get("menu.Field.Text"),
                     hoverText: TR.Get("menu.Field.Hover"));
-            var sld_field = new Slider(this,
-                    new Rectangle(126, y, 201, 20), 50, new int[]{0, 100});
+            var sld_field = new Slider(this, new Rectangle(126, y, 201, 20),
+                    name: "Field", range: new int[]{0, 100});
             sld_field.ValueDelegate = sld_field.FloatRenderer(denom:100f);
             y += lbl_field.Bounds.Height + 8;
             var lbl_ramp = new Label(this,
                     new Rectangle(20, y, 96, 20),
                     text: TR.Get("menu.Ramp.Text"),
                     hoverText: TR.Get("menu.Ramp.Hover"));
-            var sld_ramp = new Slider(this,
-                    new Rectangle(126, y, 201, 20), 20, new int[]{0, 50});
+            var sld_ramp = new Slider(this, new Rectangle(126, y, 201, 20),
+                    name: "Ramp", range: new int[]{0, 50});
             sld_ramp.ValueDelegate = sld_ramp.FloatRenderer(denom:100f);
             y += lbl_ramp.Bounds.Height + 8;
             var lbl_intensity = new Label(this,
                     new Rectangle(20, y, 96, 20),
                     text: TR.Get("menu.Intensity.Text"),
                     hoverText: TR.Get("menu.Intensity.Hover"));
-            var sld_intensity = new Slider(this,
-                    new Rectangle(126, y, 201, 20), 60, new int[]{0, 100});
+            var sld_intensity = new Slider(this, new Rectangle(126, y, 201, 20),
+                    name: "Intensity", range: new int[]{0, 100});
             sld_intensity.ValueDelegate = sld_intensity.FloatRenderer(denom:10f);
             y += lbl_intensity.Bounds.Height + 16;
+
+            var btn_save = new TextButton(this, 0, 0, "Save", onClick:SaveSettings);
+            btn_save.Bounds.X = defaultWidth/2 - btn_save.Bounds.Width/2;
+            btn_save.Bounds.Y = defaultHeight - btn_save.Bounds.Height - 8;
 
             this.children.AddRange(new List<Widget>() {
                 lbl_enableColorizer, chk_enableColorizer,
@@ -178,7 +188,99 @@ namespace ichortower.ui
                 lbl_field, sld_field,
                 lbl_ramp, sld_ramp,
                 lbl_intensity, sld_intensity,
+                btn_save,
             });
+        }
+
+        public void LoadCurrentSettings()
+        {
+            foreach (var child in this.children) {
+                if (child is Checkbox ch) {
+                    switch (ch.Name) {
+                    case "ColorizerEnabled":
+                        ch.Value = Nightshade.Config.ColorizerEnabled;
+                        break;
+                    case "ColorizeBySeason":
+                        ch.Value = Nightshade.Config.ColorizeBySeason;
+                        break;
+                    case "DepthOfFieldEnabled":
+                        ch.Value = Nightshade.Config.DepthOfFieldEnabled;
+                        break;
+
+                    }
+                }
+            }
+            LoadColorizerPreset(Nightshade.Config.ColorizerProfiles[0]);
+            LoadDepthOfFieldPreset(Nightshade.Config.DepthOfFieldSettings);
+        }
+
+        public void LoadColorizerPreset(ColorizerPreset set)
+        {
+            foreach (var child in this.children) {
+                if (child is Slider ch) {
+                    switch (ch.Name) {
+                    case "Saturation":
+                        ch.Value = (int)(set.Saturation * 100);
+                        break;
+                    case "Lightness":
+                        ch.Value = (int)(set.Lightness * 100);
+                        break;
+                    case "Contrast":
+                        ch.Value = (int)(set.Contrast * 100);
+                        break;
+                    case "ShadowR":
+                        ch.Value = (int)(set.ShadowR * 100);
+                        break;
+                    case "ShadowG":
+                        ch.Value = (int)(set.ShadowG * 100);
+                        break;
+                    case "ShadowB":
+                        ch.Value = (int)(set.ShadowB * 100);
+                        break;
+                    case "MidtoneR":
+                        ch.Value = (int)(set.MidtoneR * 100);
+                        break;
+                    case "MidtoneG":
+                        ch.Value = (int)(set.MidtoneG * 100);
+                        break;
+                    case "MidtoneB":
+                        ch.Value = (int)(set.MidtoneB * 100);
+                        break;
+                    case "HighlightR":
+                        ch.Value = (int)(set.HighlightR * 100);
+                        break;
+                    case "HighlightG":
+                        ch.Value = (int)(set.HighlightG * 100);
+                        break;
+                    case "HighlightB":
+                        ch.Value = (int)(set.HighlightB * 100);
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void LoadDepthOfFieldPreset(DepthOfFieldPreset set)
+        {
+            foreach (var child in this.children) {
+                if ((child is Slider ch)) {
+                    switch (ch.Name) {
+                    case "Field":
+                        ch.Value = (int)(set.Field * 100);
+                        break;
+                    case "Ramp":
+                        ch.Value = (int)(set.Ramp * 100);
+                        break;
+                    case "Intensity":
+                        ch.Value = (int)(set.Intensity * 10);
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void SaveSettings()
+        {
         }
 
         public override void draw(SpriteBatch b)
@@ -254,6 +356,24 @@ namespace ichortower.ui
             base.receiveKeyPress(key);
             if (this.keyedChild != null) {
                 this.keyedChild.keyPress(key);
+            }
+        }
+
+        public void onChildChange(Widget child)
+        {
+            if (child == bySeasonToggle) {
+                if ((child as Checkbox).Value) {
+                    seasonSwitcher.Labels = new string[] {
+                        "Spring", "Summer", "Fall", "Winter"
+                    };
+                }
+                else {
+                    seasonSwitcher.Labels = new string[] {
+                        " 1 ", " 2 ", " 3 ", " 4 "
+                    };
+                }
+            }
+            else if (child == seasonSwitcher) {
             }
         }
 
