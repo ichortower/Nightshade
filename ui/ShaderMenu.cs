@@ -140,7 +140,7 @@ namespace ichortower.ui
                     hoverText: TR.Get("menu.Field.Hover"));
             var sld_field = new Slider(this,
                     new Rectangle(126, y, 201, 20), 50, new int[]{0, 100});
-            sld_field.ValueDelegate = sld_field.RenderAsFloat;
+            sld_field.ValueDelegate = sld_field.FloatRenderer(denom:100f);
             y += lbl_field.Bounds.Height + 8;
             var lbl_ramp = new Label(this,
                     new Rectangle(20, y, 96, 20),
@@ -148,7 +148,7 @@ namespace ichortower.ui
                     hoverText: TR.Get("menu.Ramp.Hover"));
             var sld_ramp = new Slider(this,
                     new Rectangle(126, y, 201, 20), 20, new int[]{0, 50});
-            sld_ramp.ValueDelegate = sld_ramp.RenderAsFloat;
+            sld_ramp.ValueDelegate = sld_ramp.FloatRenderer(denom:100f);
             y += lbl_ramp.Bounds.Height + 8;
             var lbl_intensity = new Label(this,
                     new Rectangle(20, y, 96, 20),
@@ -156,7 +156,7 @@ namespace ichortower.ui
                     hoverText: TR.Get("menu.Intensity.Hover"));
             var sld_intensity = new Slider(this,
                     new Rectangle(126, y, 201, 20), 60, new int[]{0, 100});
-            sld_intensity.ValueDelegate = sld_intensity.RenderAsFloat;
+            sld_intensity.ValueDelegate = sld_intensity.FloatRenderer(denom:10f);
             y += lbl_intensity.Bounds.Height + 16;
 
             this.children.AddRange(new List<Widget>() {

@@ -22,7 +22,7 @@ namespace ichortower.ui
             }
         }
 
-        public Func<string> ValueDelegate = null;
+        public Func<int, string> ValueDelegate = null;
 
         public Slider(IClickableMenu parent, int xpos, int ypos, int initial)
             : this(parent, new Rectangle(xpos, ypos, Slider.defaultWidth, Slider.defaultHeight),
@@ -63,7 +63,7 @@ namespace ichortower.ui
             b.Draw(Game1.mouseCursors, color: Color.White,
                     sourceRectangle: new Rectangle(boxX+7, 256, 3, 10),
                     destinationRectangle: new Rectangle(screenb.X + dist, screenb.Y, 6, 20));
-            string disp = this.ValueDelegate?.Invoke() ?? $"{this.Value}";
+            string disp = this.ValueDelegate?.Invoke(this.Value) ?? $"{this.Value}";
             Utility.drawTextWithShadow(b, disp, Game1.smallFont,
                     new Vector2(screenb.X + screenb.Width + 4, screenb.Y - 4),
                     Game1.textColor);
@@ -82,17 +82,17 @@ namespace ichortower.ui
 
         public override void keyPress(Keys key)
         {
-            if (Game1.options.doesInputListContain(Game1.options.moveRightButton, key)) {
+            if (key == Keys.Right || Game1.options.doesInputListContain(Game1.options.moveRightButton, key)) {
                 this.Value += 1;
             }
-            else if (Game1.options.doesInputListContain(Game1.options.moveLeftButton, key)) {
+            else if (key == Keys.Left || Game1.options.doesInputListContain(Game1.options.moveLeftButton, key)) {
                 this.Value -= 1;
             }
         }
 
-        public string RenderAsFloat()
+        public Func<int, string> FloatRenderer(float denom)
         {
-            return string.Format("{0:0.00}", (float)Value/100f);
+            return (val) => string.Format("{0:0.00}", (float)val/denom);
         }
     }
 }
