@@ -25,5 +25,9 @@
   "menu.Intensity.Text": "Intensity",
   "menu.Intensity.Hover": "How powerful the blur effect is (at maximum).",
 
+  "gmcm.MenuKeybind.name": "MenuKeybind",
+  "gmcm.MenuKeybind.tooltip": "The keybinding to open the Nightshade menu.",
+  "gmcm.Explainer.text": "Nightshade has its own config menu, which provides live preview of the slider settings. Please use that menu after configuring an appropriate keybinding.",
+
   "EOF": ""
 }

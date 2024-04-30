@@ -23,15 +23,14 @@ namespace ichortower
         private static RenderTarget2D uiScreen = null;
         private static RenderTarget2D sceneScreen = null;
 
-        private static ModConfig Config;
+        public static ModConfig Config;
 
-        public static IMonitor mon = null;
+        public static Nightshade instance;
 
         public override void Entry(IModHelper helper)
         {
-            mon = Monitor;
+            instance = this;
             ModId = this.ModManifest.UniqueID;
-            TR.Helper = helper;
             try {
                 byte[] stream = File.ReadAllBytes(Path.Combine(
                         helper.DirectoryPath, "assets/colorizer.mgfx"));
@@ -90,11 +89,17 @@ namespace ichortower
                     "SpriteBatch_Begin_Postfix");
             harmony.Patch(target, postfix: Postfix);
             */
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Display.Rendered += this.OnRendered;
             //helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Content.AssetReady += this.OnAssetReady;
+        }
+
+        public void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            GMCMIntegration.Setup();
         }
 
         public void OnAssetRequested(object sender, AssetRequestedEventArgs e)

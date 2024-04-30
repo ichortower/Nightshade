@@ -1,7 +1,11 @@
+using StardewModdingAPI;
+using StardewModdingAPI.Utilities;
+
 namespace ichortower
 {
     public sealed class ModConfig
     {
+        public KeybindList MenuKeybind = new(SButton.H);
         public bool ColorizerEnabled = true;
         public bool ColorizeBySeason = true;
         public int ColorizerActiveProfile = 0;
