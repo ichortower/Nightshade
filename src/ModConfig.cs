@@ -14,7 +14,7 @@ namespace ichortower
         };
 
         public bool DepthOfFieldEnabled = true;
-        public DepthOfFieldPreset DepthOfFieldSettings;
+        public DepthOfFieldPreset DepthOfFieldSettings = new();
     }
 
     public sealed class ColorizerPreset
