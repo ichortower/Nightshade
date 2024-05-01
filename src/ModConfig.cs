@@ -13,7 +13,7 @@ namespace ichortower
             new(), new(), new(), new(),
         };
 
-        public bool DepthOfFieldEnabled = true;
+        public bool DepthOfFieldEnabled = false;
         public DepthOfFieldPreset DepthOfFieldSettings = new();
     }
 
