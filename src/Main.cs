@@ -84,6 +84,7 @@ namespace ichortower
             */
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Specialized.LoadStageChanged += this.OnLoadStageChanged;
+            helper.Events.GameLoop.Saved += this.OnSaved;
             helper.Events.Display.Rendered += this.OnRendered;
             helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
@@ -125,6 +126,11 @@ namespace ichortower
             if (e.NewStage == LoadStage.Preloaded) {
                 ApplyConfig(Nightshade.Config);
             }
+        }
+
+        public void OnSaved(object sender, SavedEventArgs e)
+        {
+            ApplyConfig(Nightshade.Config);
         }
 
         public void OnAssetRequested(object sender, AssetRequestedEventArgs e)
