@@ -306,6 +306,7 @@ namespace ichortower.ui
         public void SaveSettings()
         {
             ModConfig built = new();
+            built.MenuKeybind = Nightshade.Config.MenuKeybind;
             foreach (var ch in this.children) {
                 switch (ch.Name) {
                 case "ColorizerEnabled":
