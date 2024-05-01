@@ -87,11 +87,15 @@ namespace ichortower.ui
 
         public override void keyPress(Keys key)
         {
+            int prev = this.Value;
             if (key == Keys.Right || Game1.options.doesInputListContain(Game1.options.moveRightButton, key)) {
                 this.Value += 1;
             }
             else if (key == Keys.Left || Game1.options.doesInputListContain(Game1.options.moveLeftButton, key)) {
                 this.Value -= 1;
+            }
+            if (prev != this.Value && this.parent is ShaderMenu m) {
+                m.onChildChange(this);
             }
         }
 
