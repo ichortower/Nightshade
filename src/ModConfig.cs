@@ -19,9 +19,9 @@ namespace ichortower
 
     public sealed class ColorizerPreset
     {
-        public float Saturation = -0.12f;
+        public float Saturation = 0f;
         public float Lightness = 0f;
-        public float Contrast = 0.06f;
+        public float Contrast = 0f;
 
         public LumaType Luma = LumaType.BT709;
 
@@ -46,7 +46,6 @@ namespace ichortower
         public float Ramp = 0.16f;
         public float Intensity = 6.0f;
     }
-
 
     public enum LumaType {
         BT709 = 0,

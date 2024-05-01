@@ -31,6 +31,8 @@ namespace ichortower.ui
             new(), new(), new(), new()
         };
 
+        private ColorizerPreset CopyPasteBuffer = null;
+
         public ShaderMenu()
             : this(defaultX, defaultY)
         {
@@ -127,19 +129,19 @@ namespace ichortower.ui
                     new string[] {}, parent: this);
             y += 2 + 16;
 
-            var btn_revert = new IconButton(this, defaultWidth-47, buttonY,
+            var btn_revert = new IconButton(this, defaultWidth-50, buttonY,
                     iconIndex: 0, hoverText: TR.Get("menu.RevertButton.Hover"),
                     onClick: RevertCurrentProfile);
             buttonY += IconButton.defaultHeight + 8;
-            var btn_clear = new IconButton(this, defaultWidth-47, buttonY,
+            var btn_clear = new IconButton(this, defaultWidth-50, buttonY,
                     iconIndex: 1, hoverText: TR.Get("menu.ClearButton.Hover"),
                     onClick: ClearCurrentProfile);
             buttonY += IconButton.defaultHeight + 8;
-            var btn_copy = new IconButton(this, defaultWidth-47, buttonY,
+            var btn_copy = new IconButton(this, defaultWidth-50, buttonY,
                     iconIndex: 2, hoverText: TR.Get("menu.CopyButton.Hover"),
                     onClick: CopyCurrentProfile);
             buttonY += IconButton.defaultHeight + 8;
-            var btn_paste = new IconButton(this, defaultWidth-47, buttonY,
+            var btn_paste = new IconButton(this, defaultWidth-50, buttonY,
                     iconIndex: 3, hoverText: TR.Get("menu.PasteButton.Hover"),
                     onClick: PasteCurrentProfile);
             buttonY += IconButton.defaultHeight + 8;
@@ -303,6 +305,34 @@ namespace ichortower.ui
 
         public void SaveSettings()
         {
+            ModConfig built = new();
+            foreach (var ch in this.children) {
+                switch (ch.Name) {
+                case "ColorizerEnabled":
+                    built.ColorizerEnabled = (ch as Checkbox).Value;
+                    break;
+                case "DepthOfFieldEnabled":
+                    built.DepthOfFieldEnabled = (ch as Checkbox).Value;
+                    break;
+                case "Field":
+                    built.DepthOfFieldSettings.Field = (float)(ch as Slider).Value / 100f;
+                    break;
+                case "Ramp":
+                    built.DepthOfFieldSettings.Ramp = (float)(ch as Slider).Value / 100f;
+                    break;
+                case "Intensity":
+                    built.DepthOfFieldSettings.Intensity = (float)(ch as Slider).Value / 10f;
+                    break;
+                }
+            }
+            for (int i = 0; i < ColorizerActiveStates.Length; ++i) {
+                built.ColorizerProfiles[i] = ColorizerActiveStates[i].Clone();
+            }
+            built.ColorizeBySeason = bySeasonToggle.Value;
+            built.ColorizerActiveProfile = seasonSwitcher.FocusedIndex;
+            Nightshade.Config = built;
+            Nightshade.instance.Helper.WriteConfig(Nightshade.Config);
+            // toast "saved"
         }
 
         public override void draw(SpriteBatch b)
@@ -391,46 +421,44 @@ namespace ichortower.ui
                 LoadColorizerPreset(ColorizerActiveStates[seasonSwitcher.FocusedIndex]);
             }
             ColorizerPreset current = ColorizerActiveStates[seasonSwitcher.FocusedIndex];
-            foreach (var ch in this.children) {
-                if (ch is Slider sl) {
-                    switch (sl.Name) {
-                    case "Saturation":
-                        current.Saturation = sl.Value / 100f;
-                        break;
-                    case "Lightness":
-                        current.Lightness = sl.Value / 100f;
-                        break;
-                    case "Contrast":
-                        current.Contrast = sl.Value / 100f;
-                        break;
-                    case "ShadowR":
-                        current.ShadowR = sl.Value / 100f;
-                        break;
-                    case "ShadowG":
-                        current.ShadowG = sl.Value / 100f;
-                        break;
-                    case "ShadowB":
-                        current.ShadowB = sl.Value / 100f;
-                        break;
-                    case "MidtoneR":
-                        current.MidtoneR = sl.Value / 100f;
-                        break;
-                    case "MidtoneG":
-                        current.MidtoneG = sl.Value / 100f;
-                        break;
-                    case "MidtoneB":
-                        current.MidtoneB = sl.Value / 100f;
-                        break;
-                    case "HighlightR":
-                        current.HighlightR = sl.Value / 100f;
-                        break;
-                    case "HighlightG":
-                        current.HighlightG = sl.Value / 100f;
-                        break;
-                    case "HighlightB":
-                        current.HighlightB = sl.Value / 100f;
-                        break;
-                    }
+            if (child is Slider sl) {
+                switch (sl.Name) {
+                case "Saturation":
+                    current.Saturation = sl.Value / 100f;
+                    break;
+                case "Lightness":
+                    current.Lightness = sl.Value / 100f;
+                    break;
+                case "Contrast":
+                    current.Contrast = sl.Value / 100f;
+                    break;
+                case "ShadowR":
+                    current.ShadowR = sl.Value / 100f;
+                    break;
+                case "ShadowG":
+                    current.ShadowG = sl.Value / 100f;
+                    break;
+                case "ShadowB":
+                    current.ShadowB = sl.Value / 100f;
+                    break;
+                case "MidtoneR":
+                    current.MidtoneR = sl.Value / 100f;
+                    break;
+                case "MidtoneG":
+                    current.MidtoneG = sl.Value / 100f;
+                    break;
+                case "MidtoneB":
+                    current.MidtoneB = sl.Value / 100f;
+                    break;
+                case "HighlightR":
+                    current.HighlightR = sl.Value / 100f;
+                    break;
+                case "HighlightG":
+                    current.HighlightG = sl.Value / 100f;
+                    break;
+                case "HighlightB":
+                    current.HighlightB = sl.Value / 100f;
+                    break;
                 }
             }
             ModConfig built = new();
@@ -443,13 +471,13 @@ namespace ichortower.ui
                     built.DepthOfFieldEnabled = (ch as Checkbox).Value;
                     break;
                 case "Field":
-                    built.DepthOfFieldSettings.Field = (ch as Slider).Value;
+                    built.DepthOfFieldSettings.Field = (float)(ch as Slider).Value / 100f;
                     break;
                 case "Ramp":
-                    built.DepthOfFieldSettings.Ramp = (ch as Slider).Value;
+                    built.DepthOfFieldSettings.Ramp = (float)(ch as Slider).Value / 100f;
                     break;
                 case "Intensity":
-                    built.DepthOfFieldSettings.Intensity = (ch as Slider).Value;
+                    built.DepthOfFieldSettings.Intensity = (float)(ch as Slider).Value / 10f;
                     break;
                 }
             }
@@ -457,7 +485,10 @@ namespace ichortower.ui
             for (int i = 0; i < ColorizerActiveStates.Length; ++i) {
                 built.ColorizerProfiles[i] = ColorizerActiveStates[i].Clone();
             }
-            built.ColorizeBySeason = bySeasonToggle.Value;
+            // because this is controlling the live preview, we don't care if
+            // colorize by season is on. force it off so we see the current
+            // profile.
+            built.ColorizeBySeason = false;
             built.ColorizerActiveProfile = seasonSwitcher.FocusedIndex;
             Nightshade.instance.ApplyConfig(built);
         }
@@ -492,18 +523,35 @@ namespace ichortower.ui
 
         public void RevertCurrentProfile()
         {
+            ref ColorizerPreset current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+            ColorizerPreset rev = ColorizerInitialStates[seasonSwitcher.FocusedIndex];
+            current = rev.Clone();
+            LoadColorizerPreset(current);
+            onChildChange(null);
         }
 
         public void ClearCurrentProfile()
         {
+            ref ColorizerPreset current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+            current = new();
+            LoadColorizerPreset(current);
+            onChildChange(null);
         }
 
         public void CopyCurrentProfile()
         {
+            ColorizerPreset current = ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+            CopyPasteBuffer = current.Clone();
         }
 
         public void PasteCurrentProfile()
         {
+            if (CopyPasteBuffer != null) {
+                ref ColorizerPreset current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+                current = CopyPasteBuffer.Clone();
+                LoadColorizerPreset(current);
+                onChildChange(null);
+            }
         }
 
     }
