@@ -147,10 +147,17 @@ namespace ichortower
             }
         }
 
-        public void EnsureBuffers(bool reallocate = false)
+        /*
+         * worldSource: the current render target for the world layer.
+         * during map screenshots, the game uses a separate buffer of a
+         * different size (UI layer not affected).
+         */
+        public void EnsureBuffers(RenderTarget2D worldSource, bool reallocate = false)
         {
-            int sw = Game1.game1.screen.Width;
-            int sh = Game1.game1.screen.Height;
+            // we probably don't need to null coalesce here, but better safe
+            // than sorry
+            int sw = (worldSource ?? Game1.game1.screen).Width;
+            int sh = (worldSource ?? Game1.game1.screen).Height;
             if (reallocate || sceneScreen is null || 
                     (sceneScreen.Width != sw || sceneScreen.Height != sh)) {
                 sceneScreen?.Dispose();
@@ -173,7 +180,6 @@ namespace ichortower
             if (!usingColorizer) {
                 return;
             }
-            EnsureBuffers();
             // call End/Begin to flush any pending draws in the spritebatch.
             // otherwise, they won't be drawn until after our shader.
             // the parameters to Begin are known and are the same as the ones
@@ -183,37 +189,23 @@ namespace ichortower
             e.SpriteBatch.Begin(SpriteSortMode.Deferred,
                     BlendState.AlphaBlend,
                     SamplerState.PointClamp);
-
-            // save current render target for restoration later
+            // get current render target. we need to restore it later, and
+            // we need to read from and write back to it.
             RenderTarget2D savedTarget = null;
             RenderTargetBinding[] rt = Game1.graphics.GraphicsDevice.GetRenderTargets();
             if (rt.Length > 0) {
                 savedTarget = rt[0].RenderTarget as RenderTarget2D;
             }
+            EnsureBuffers(savedTarget);
 
-            // apply the shader by rendering the two framebuffers twice each:
-            // once to the appropriate back buffer, applying the shader, then
-            // again to re-render it (no shader) back to where it was.
-            // this is much more performant than trying to move or copy the
-            // data in some other way.
-            Game1.SetRenderTarget(sceneScreen);
-            sb.Begin(SpriteSortMode.Deferred,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp,
-                    effect: Nightshade.ColorShader);
-            sb.Draw(texture: Game1.game1.screen,
-                    position: Vector2.Zero,
-                    color: Color.White);
-            sb.End();
-            Game1.SetRenderTarget(Game1.game1.screen);
-            sb.Begin(SpriteSortMode.Deferred,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp);
-            sb.Draw(texture: sceneScreen,
-                    position: Vector2.Zero,
-                    color: Color.White);
-            sb.End();
-
+            // each layer (world, UI) is drawn to the appropriate back buffer
+            // with the shader enabled, then blitted back to where it was.
+            //
+            // it is important to do the world layer second: during map
+            // screenshots, the game renders to a target which is set to
+            // RenderTargetUsage.DiscardContents, so it is automatically cleared
+            // when it is set as the active render target; therefore we must
+            // only do so once.
             Game1.SetRenderTarget(uiScreen);
             Game1.game1.GraphicsDevice.Clear(Color.Transparent);
             sb.Begin(SpriteSortMode.Deferred,
@@ -234,7 +226,24 @@ namespace ichortower
                     color: Color.White);
             sb.End();
 
+            Game1.SetRenderTarget(sceneScreen);
+            Game1.game1.GraphicsDevice.Clear(Game1.bgColor);
+            sb.Begin(SpriteSortMode.Deferred,
+                    BlendState.AlphaBlend,
+                    SamplerState.PointClamp,
+                    effect: Nightshade.ColorShader);
+            sb.Draw(texture: savedTarget,
+                    position: Vector2.Zero,
+                    color: Color.White);
+            sb.End();
             Game1.SetRenderTarget(savedTarget);
+            sb.Begin(SpriteSortMode.Deferred,
+                    BlendState.AlphaBlend,
+                    SamplerState.PointClamp);
+            sb.Draw(texture: sceneScreen,
+                    position: Vector2.Zero,
+                    color: Color.White);
+            sb.End();
         }
 
         // this is much like OnRendered, but it's for the depth-of-field
@@ -245,18 +254,21 @@ namespace ichortower
             if (!usingDepthOfField) {
                 return;
             }
-            EnsureBuffers();
+            if (Game1.game1.takingMapScreenshot) {
+                return;
+            }
+            // flush pending draws
             e.SpriteBatch.End();
             e.SpriteBatch.Begin(SpriteSortMode.Deferred,
                     BlendState.AlphaBlend,
                     SamplerState.PointClamp);
-
             // save current render target for restoration later
             RenderTarget2D savedTarget = null;
             RenderTargetBinding[] rt = Game1.graphics.GraphicsDevice.GetRenderTargets();
             if (rt.Length > 0) {
                 savedTarget = rt[0].RenderTarget as RenderTarget2D;
             }
+            EnsureBuffers(savedTarget);
 
             Nightshade.DofShader.Parameters["PitchX"]?.SetValue(
                     1f / (float)sceneScreen.Width);
@@ -265,6 +277,9 @@ namespace ichortower
             float ypos = Game1.player.getLocalPosition(Game1.viewport).Y;
             ypos += Game1.player.GetBoundingBox().Height / 2;
             ypos /= Game1.viewport.Height;
+            if (ypos < 0f || ypos > 1.0f) {
+                ypos = 0.5f;
+            }
             Nightshade.DofShader.Parameters["Center"].SetValue(ypos);
 
             DofShader.CurrentTechnique = DofShader.Techniques[0];
