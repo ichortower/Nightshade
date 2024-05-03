@@ -24,6 +24,7 @@
   "menu.Ramp.Hover": "How slowly the blur increases to full intensity once leaving the field. Higher values are slower.",
   "menu.Intensity.Text": "Intensity",
   "menu.Intensity.Hover": "How powerful the blur effect is (at maximum).",
+  "menu.Save.Text": "Save",
 
   "gmcm.MenuKeybind.name": "MenuKeybind",
   "gmcm.MenuKeybind.tooltip": "The keybinding to open the Nightshade menu.",

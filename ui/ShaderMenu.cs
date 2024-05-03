@@ -177,7 +177,8 @@ namespace ichortower.ui
             sld_intensity.ValueDelegate = sld_intensity.FloatRenderer(denom:10f);
             y += lbl_intensity.Bounds.Height + 16;
 
-            var btn_save = new TextButton(this, 0, 0, "Save", onClick:SaveSettings);
+            var btn_save = new TextButton(this, 0, 0,
+                    text: TR.Get("menu.Save.Text"), onClick: SaveSettings);
             btn_save.Bounds.X = defaultWidth/2 - btn_save.Bounds.Width/2;
             btn_save.Bounds.Y = defaultHeight - btn_save.Bounds.Height - 8;
 
