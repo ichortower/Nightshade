@@ -6,7 +6,8 @@ namespace ichortower
     public sealed class ModConfig
     {
         public KeybindList MenuKeybind = new(SButton.H);
-        public bool ColorizerEnabled = true;
+        public bool ColorizeWorld = true;
+        public bool ColorizeUI = true;
         public bool ColorizeBySeason = true;
         public int ColorizerActiveProfile = 0;
         public ColorizerPreset[] ColorizerProfiles = new ColorizerPreset[4] {
@@ -43,7 +44,6 @@ namespace ichortower
     public sealed class DepthOfFieldPreset
     {
         public float Field = 0.6f;
-        public float Ramp = 0.16f;
         public float Intensity = 6.0f;
     }
 

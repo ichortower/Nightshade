@@ -23,7 +23,8 @@ namespace ichortower
 
         private static RenderTarget2D uiScreen = null;
         private static RenderTarget2D sceneScreen = null;
-        private static bool usingColorizer = false;
+        private static bool usingColorizeWorld = false;
+        private static bool usingColorizeUI = false;
         private static bool usingDepthOfField = false;
 
         public static ModConfig Config;
@@ -111,7 +112,8 @@ namespace ichortower
             DofShader.Parameters["Field"].SetValue(conf.DepthOfFieldSettings.Field);
             DofShader.Parameters["Intensity"].SetValue(conf.DepthOfFieldSettings.Intensity);
 
-            usingColorizer = conf.ColorizerEnabled;
+            usingColorizeWorld = conf.ColorizeWorld;
+            usingColorizeUI = conf.ColorizeUI;
             usingDepthOfField = conf.DepthOfFieldEnabled;
         }
 
@@ -176,7 +178,7 @@ namespace ichortower
         [EventPriority(EventPriority.Low - 10)]
         public void OnRendered(object sender, RenderedEventArgs e)
         {
-            if (!usingColorizer) {
+            if (!usingColorizeWorld && !usingColorizeUI) {
                 return;
             }
             // call End/Begin to flush any pending draws in the spritebatch.
@@ -207,48 +209,52 @@ namespace ichortower
             // RenderTargetUsage.DiscardContents, so it is automatically cleared
             // when it is set as the active render target; therefore we must
             // only do so once.
-            Game1.SetRenderTarget(uiScreen);
-            Game1.game1.GraphicsDevice.Clear(Color.Transparent);
-            sb.Begin(SpriteSortMode.Deferred,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp,
-                    effect: Nightshade.ColorShader);
-            sb.Draw(texture: Game1.game1.uiScreen,
-                    position: Vector2.Zero,
-                    color: Color.White);
-            sb.End();
-            Game1.SetRenderTarget(Game1.game1.uiScreen);
-            Game1.game1.GraphicsDevice.Clear(Color.Transparent);
-            sb.Begin(SpriteSortMode.Deferred,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp);
-            sb.Draw(texture: uiScreen,
-                    position: Vector2.Zero,
-                    color: Color.White);
-            sb.End();
+            if (usingColorizeUI) {
+                Game1.SetRenderTarget(uiScreen);
+                Game1.game1.GraphicsDevice.Clear(Color.Transparent);
+                sb.Begin(SpriteSortMode.Deferred,
+                        BlendState.AlphaBlend,
+                        SamplerState.PointClamp,
+                        effect: Nightshade.ColorShader);
+                sb.Draw(texture: Game1.game1.uiScreen,
+                        position: Vector2.Zero,
+                        color: Color.White);
+                sb.End();
+                Game1.SetRenderTarget(Game1.game1.uiScreen);
+                Game1.game1.GraphicsDevice.Clear(Color.Transparent);
+                sb.Begin(SpriteSortMode.Deferred,
+                        BlendState.AlphaBlend,
+                        SamplerState.PointClamp);
+                sb.Draw(texture: uiScreen,
+                        position: Vector2.Zero,
+                        color: Color.White);
+                sb.End();
+            }
 
             // the world layer runs the shader on the render back in, instead
             // of the render out. I believe Game1.lightmap leaves the layer in
             // a different state with alpha not premultiplied, so blitting it
             // first puts it in the state the shader expects.
-            Game1.SetRenderTarget(sceneScreen);
-            Game1.game1.GraphicsDevice.Clear(Game1.bgColor);
-            sb.Begin(SpriteSortMode.Deferred,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp);
-            sb.Draw(texture: savedTarget,
-                    position: Vector2.Zero,
-                    color: Color.White);
-            sb.End();
-            Game1.SetRenderTarget(savedTarget);
-            sb.Begin(SpriteSortMode.Deferred,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp,
-                    effect: Nightshade.ColorShader);
-            sb.Draw(texture: sceneScreen,
-                    position: Vector2.Zero,
-                    color: Color.White);
-            sb.End();
+            if (usingColorizeWorld) {
+                Game1.SetRenderTarget(sceneScreen);
+                Game1.game1.GraphicsDevice.Clear(Game1.bgColor);
+                sb.Begin(SpriteSortMode.Deferred,
+                        BlendState.AlphaBlend,
+                        SamplerState.PointClamp);
+                sb.Draw(texture: savedTarget,
+                        position: Vector2.Zero,
+                        color: Color.White);
+                sb.End();
+                Game1.SetRenderTarget(savedTarget);
+                sb.Begin(SpriteSortMode.Deferred,
+                        BlendState.AlphaBlend,
+                        SamplerState.PointClamp,
+                        effect: Nightshade.ColorShader);
+                sb.Draw(texture: sceneScreen,
+                        position: Vector2.Zero,
+                        color: Color.White);
+                sb.End();
+            }
         }
 
         // this is much like OnRendered, but it's for the depth-of-field

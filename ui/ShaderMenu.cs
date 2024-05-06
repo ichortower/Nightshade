@@ -57,22 +57,40 @@ namespace ichortower.ui
         private void AddChildWidgets()
         {
             int y = 20;
+            int x = 20;
             // give labels the same height (27) as checkboxes so they line up
             // vertically (default valign is center)
-            var chk_enableColorizer = new Checkbox(this, 20, y, "ColorizerEnabled");
-            var lbl_enableColorizer = new Label(this,
-                    new Rectangle(56, y, 0, 27),
-                    text: TR.Get("menu.EnableColorizer.Text"),
-                    activate: chk_enableColorizer);
-            y += chk_enableColorizer.Bounds.Height + 8;
-            var chk_colorBySeason = new Checkbox(this, 20, y, "ColorizeBySeason");
+            var lbl_colorizer = new Label(this,
+                    new Rectangle(x, y, 0, 27),
+                    text: TR.Get("menu.Colorizer.Text"));
+            x += lbl_colorizer.Bounds.Width + 16;
+            var chk_colorizeWorld = new Checkbox(this, x, y, "ColorizeWorld");
+            x += chk_colorizeWorld.Bounds.Width + 8;
+            var lbl_colorizeWorld = new Label(this,
+                    new Rectangle(x, y, 0, 27),
+                    text: TR.Get("menu.ColorizeWorld.Text"),
+                    hoverText: TR.Get("menu.ColorizeWorld.Hover"),
+                    activate: chk_colorizeWorld);
+            x += lbl_colorizeWorld.Bounds.Width + 16;
+            var chk_colorizeUI = new Checkbox(this, x, y, "ColorizeUI");
+            x += chk_colorizeUI.Bounds.Width + 8;
+            var lbl_colorizeUI = new Label(this,
+                    new Rectangle(x, y, 0, 27),
+                    text: TR.Get("menu.ColorizeUI.Text"),
+                    hoverText: TR.Get("menu.ColorizeUI.Hover"),
+                    activate: chk_colorizeUI);
+            y += lbl_colorizer.Bounds.Height + 8;
+            x = 20;
+            var chk_colorBySeason = new Checkbox(this, x, y, "ColorizeBySeason");
             bySeasonToggle = chk_colorBySeason;
+            x += chk_colorBySeason.Bounds.Width + 8;
             var lbl_colorBySeason = new Label(this,
-                    new Rectangle(56, y, 0, 27),
+                    new Rectangle(x, y, 0, 27),
                     text: TR.Get("menu.ColorizeBySeason.Text"),
                     hoverText: TR.Get("menu.ColorizeBySeason.Hover"),
                     activate: chk_colorBySeason);
             y += chk_colorBySeason.Bounds.Height + 16;
+
             var tbr_profiles = new TabBar(
                     new Rectangle(4, y, defaultWidth-8, 39),
                     new string[] {" 1 ", " 2 ", " 3 ", " 4 "},
@@ -160,14 +178,6 @@ namespace ichortower.ui
                     name: "Field", range: new int[]{0, 100});
             sld_field.ValueDelegate = sld_field.FloatRenderer(denom:100f);
             y += lbl_field.Bounds.Height + 8;
-            var lbl_ramp = new Label(this,
-                    new Rectangle(20, y, 96, 20),
-                    text: TR.Get("menu.Ramp.Text"),
-                    hoverText: TR.Get("menu.Ramp.Hover"));
-            var sld_ramp = new Slider(this, new Rectangle(126, y, 201, 20),
-                    name: "Ramp", range: new int[]{0, 50});
-            sld_ramp.ValueDelegate = sld_ramp.FloatRenderer(denom:100f);
-            y += lbl_ramp.Bounds.Height + 8;
             var lbl_intensity = new Label(this,
                     new Rectangle(20, y, 96, 20),
                     text: TR.Get("menu.Intensity.Text"),
@@ -183,7 +193,8 @@ namespace ichortower.ui
             btn_save.Bounds.Y = defaultHeight - btn_save.Bounds.Height - 8;
 
             this.children.AddRange(new List<Widget>() {
-                lbl_enableColorizer, chk_enableColorizer,
+                lbl_colorizer, lbl_colorizeWorld, chk_colorizeWorld,
+                lbl_colorizeUI, chk_colorizeUI,
                 lbl_colorBySeason, chk_colorBySeason,
                 tbr_profiles,
                 lbl_saturation, sld_saturation,
@@ -199,7 +210,6 @@ namespace ichortower.ui
                 tbr_separator,
                 lbl_enableDepthOfField, chk_enableDepthOfField,
                 lbl_field, sld_field,
-                lbl_ramp, sld_ramp,
                 lbl_intensity, sld_intensity,
                 btn_save,
             });
@@ -210,8 +220,11 @@ namespace ichortower.ui
             foreach (var child in this.children) {
                 if (child is Checkbox ch) {
                     switch (ch.Name) {
-                    case "ColorizerEnabled":
-                        ch.Value = Nightshade.Config.ColorizerEnabled;
+                    case "ColorizeWorld":
+                        ch.Value = Nightshade.Config.ColorizeWorld;
+                        break;
+                    case "ColorizeUI":
+                        ch.Value = Nightshade.Config.ColorizeUI;
                         break;
                     case "ColorizeBySeason":
                         ch.Value = Nightshade.Config.ColorizeBySeason;
@@ -293,9 +306,6 @@ namespace ichortower.ui
                     case "Field":
                         ch.Value = (int)(set.Field * 100);
                         break;
-                    case "Ramp":
-                        ch.Value = (int)(set.Ramp * 100);
-                        break;
                     case "Intensity":
                         ch.Value = (int)(set.Intensity * 10);
                         break;
@@ -310,17 +320,17 @@ namespace ichortower.ui
             built.MenuKeybind = Nightshade.Config.MenuKeybind;
             foreach (var ch in this.children) {
                 switch (ch.Name) {
-                case "ColorizerEnabled":
-                    built.ColorizerEnabled = (ch as Checkbox).Value;
+                case "ColorizeWorld":
+                    built.ColorizeWorld = (ch as Checkbox).Value;
+                    break;
+                case "ColorizeUI":
+                    built.ColorizeUI = (ch as Checkbox).Value;
                     break;
                 case "DepthOfFieldEnabled":
                     built.DepthOfFieldEnabled = (ch as Checkbox).Value;
                     break;
                 case "Field":
                     built.DepthOfFieldSettings.Field = (float)(ch as Slider).Value / 100f;
-                    break;
-                case "Ramp":
-                    built.DepthOfFieldSettings.Ramp = (float)(ch as Slider).Value / 100f;
                     break;
                 case "Intensity":
                     built.DepthOfFieldSettings.Intensity = (float)(ch as Slider).Value / 10f;
@@ -466,17 +476,17 @@ namespace ichortower.ui
             ModConfig built = new();
             foreach (var ch in this.children) {
                 switch (ch.Name) {
-                case "ColorizerEnabled":
-                    built.ColorizerEnabled = (ch as Checkbox).Value;
+                case "ColorizeWorld":
+                    built.ColorizeWorld = (ch as Checkbox).Value;
+                    break;
+                case "ColorizeUI":
+                    built.ColorizeUI = (ch as Checkbox).Value;
                     break;
                 case "DepthOfFieldEnabled":
                     built.DepthOfFieldEnabled = (ch as Checkbox).Value;
                     break;
                 case "Field":
                     built.DepthOfFieldSettings.Field = (float)(ch as Slider).Value / 100f;
-                    break;
-                case "Ramp":
-                    built.DepthOfFieldSettings.Ramp = (float)(ch as Slider).Value / 100f;
                     break;
                 case "Intensity":
                     built.DepthOfFieldSettings.Intensity = (float)(ch as Slider).Value / 10f;
