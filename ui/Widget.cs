@@ -50,6 +50,10 @@ namespace ichortower.ui
         {
         }
 
+        public virtual void scrollWheel(int direction)
+        {
+        }
+
         public static Rectangle[] nineslice(Rectangle source, int cornerX, int cornerY)
         {
             int[] xval = {

@@ -423,6 +423,18 @@ namespace ichortower.ui
             }
         }
 
+        public override void receiveScrollWheelAction(int direction)
+        {
+            int modx = Game1.getMouseX() - xPositionOnScreen;
+            int mody = Game1.getMouseY() - yPositionOnScreen;
+            foreach (var child in children) {
+                if (child.Bounds.Contains(modx, mody)) {
+                    child.scrollWheel(direction);
+                    break;
+                }
+            }
+        }
+
         public void onChildChange(Widget child)
         {
             if (child == bySeasonToggle) {

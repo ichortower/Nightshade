@@ -99,6 +99,15 @@ namespace ichortower.ui
             }
         }
 
+        public override void scrollWheel(int direction)
+        {
+            int prev = Value;
+            Value += Math.Sign(direction);
+            if (prev != Value && parent is ShaderMenu m) {
+                m.onChildChange(this);
+            }
+        }
+
         public Func<int, string> FloatRenderer(float denom)
         {
             return (val) => string.Format("{0:0.00}", (float)val/denom);
