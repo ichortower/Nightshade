@@ -198,8 +198,10 @@ namespace ichortower
             }
             EnsureBuffers(savedTarget);
 
-            // each layer (world, UI) is drawn to the appropriate back buffer
-            // with the shader enabled, then blitted back to where it was.
+            // each layer (world, UI) is drawn to a separate back buffer and
+            // then back to where it was, due to infelicities in how the game
+            // handles its layer buffers. only one draw uses the shader: the
+            // other one is just a blit.
             //
             // it is important to do the world layer second: during map
             // screenshots, the game renders to a target which is set to
@@ -226,12 +228,15 @@ namespace ichortower
                     color: Color.White);
             sb.End();
 
+            // the world layer runs the shader on the render back in, instead
+            // of the render out. I believe Game1.lightmap leaves the layer in
+            // a different state with alpha not premultiplied, so blitting it
+            // first puts it in the state the shader expects.
             Game1.SetRenderTarget(sceneScreen);
             Game1.game1.GraphicsDevice.Clear(Game1.bgColor);
             sb.Begin(SpriteSortMode.Deferred,
                     BlendState.AlphaBlend,
-                    SamplerState.PointClamp,
-                    effect: Nightshade.ColorShader);
+                    SamplerState.PointClamp);
             sb.Draw(texture: savedTarget,
                     position: Vector2.Zero,
                     color: Color.White);
@@ -239,7 +244,8 @@ namespace ichortower
             Game1.SetRenderTarget(savedTarget);
             sb.Begin(SpriteSortMode.Deferred,
                     BlendState.AlphaBlend,
-                    SamplerState.PointClamp);
+                    SamplerState.PointClamp,
+                    effect: Nightshade.ColorShader);
             sb.Draw(texture: sceneScreen,
                     position: Vector2.Zero,
                     color: Color.White);
