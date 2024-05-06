@@ -109,7 +109,6 @@ namespace ichortower
             ColorShader.Parameters["HighlightRgb"].SetValue(new Vector3(
                     active.HighlightR, active.HighlightG, active.HighlightB));
             DofShader.Parameters["Field"].SetValue(conf.DepthOfFieldSettings.Field);
-            DofShader.Parameters["Ramp"].SetValue(conf.DepthOfFieldSettings.Ramp);
             DofShader.Parameters["Intensity"].SetValue(conf.DepthOfFieldSettings.Intensity);
 
             usingColorizer = conf.ColorizerEnabled;

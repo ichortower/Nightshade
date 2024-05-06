@@ -16,9 +16,7 @@ sampler2D Sampler = sampler_state
 
 // From 0 to 1, the portion of the view that should be fully in focus
 float Field = 0.6;
-// From 0 upwards, how much screen height (minimum) to use to reach full blur
-float Ramp = 0.16;
-// From 0 upward, how severe (wide) the blur is, at maximum (when Ramp ends)
+// From 0 upward, how severe (wide) the blur is, at maximum
 float Intensity = 6.0;
 
 // not for user consumption
@@ -42,18 +40,16 @@ float4 Gauss(float4 inputColor, float2 UV, float2 dir, float2 field)
 {
     float4 color = tex2D(Sampler, UV) * inputColor;
     float dist = 0.0;
-    float ramp = 0.0;
+    float ramp = min(sqrt(Intensity), Intensity) / 20.0;
     if (UV.y > field.y) {
         dist = UV.y - field.y;
-        ramp = 1 - field.y;
-    }
-    else if (UV.y < field.x) {
+    } else if (UV.y < field.x) {
         dist = field.x - UV.y;
-        ramp = field.x;
     }
-    if (ramp > 0.0) {
-        ramp = max(ramp, Ramp);
-        float sigma = lerp(0, Intensity, pow(dist/ramp, 3));
+
+    if (dist != 0.0) {
+        float pct = min(dist/ramp, 1.0);
+        float sigma = lerp(0, Intensity, pct * pct);
         int m = max(ceil(sigma), 1);
         color = float4(0.0, 0.0, 0.0, 0.0);
         float Z = 0.0;
