@@ -60,8 +60,8 @@ There are a lot of controls. Here is an explanation of how they work.
     layer and the UI layer. They will use the same profile; in a future update,
     I plan to allow them to use different ones.
 * **Colorize By Season** \
-    Nightshade saves up to four color profiles in its config.json. If Colorize
-    By Season is enabled, the profiles will be mapped, in order, to Spring,
+    Nightshade saves four color profiles in its config.json. If Colorize By
+    Season is enabled, the profiles will be mapped, in order, to Spring,
     Summer, Fall, and Winter (the tab titles will change to reflect this). In
     the appropriate season, that profile will be applied automatically.
 * **Profile Switcher** \
@@ -72,18 +72,18 @@ There are a lot of controls. Here is an explanation of how they work.
     apply at all times.
 * **Saturation/Lightness/Contrast** \
     Adjust the overall saturation of colors, overall darkness/lightness of the
-    game, and overall color contrast. These sliders apply equally to the entire
-    game canvas.
+    game, and overall color contrast. These sliders apply equally to all
+    colors.
 * **Color Balance (CMY/RGB)** \
     These nine sliders allow you to adjust the balance between the primary
     RGB colors and their complements (CMY). Each group represents one pair
     (cyan-red, magenta-green, and yellow-blue), and in each group are three
     sliders, controlling (from top to bottom) shadows, midtones, and
-    highlights, giving you fine-grained control.
+    highlights, respectively, giving you fine-grained control.
 * **Revert** \
-    When you open the config menu, the current state of the four profiles is
-    saved in memory. At any time, clicking this button will return the current
-    profile to that saved state.
+    When you open the config menu, the current state of the four color profiles
+    is saved in memory. At any time, clicking this button will return the
+    current profile to that saved state.
 * **Clear** \
     Resets all color sliders in the current profile to zero.
 * **Copy** \
@@ -99,9 +99,39 @@ There are a lot of controls. Here is an explanation of how they work.
 * **Intensity** \
     Controls how strong the blur effect is, at maximum. After leaving the
     field, the blur gradually intensifies until it reaches this maximum.
+* **Save** \
+    This button saves the current settings to your config.json, including the
+    slider positions on all four color profiles. Whichever profile tab is
+    currently selected will be set as the active profile. Leaving the menu
+    without having used this button will revert everything to its prior state.
+
+    Even if you save, your screen may still change when you leave the menu;
+    if Colorize By Season is on, the active profile index is not used in favor
+    of the current active season. If you are viewing a profile from another
+    season when you exit, the mod will immediately switch to the one matching
+    the season.
 
 
 ## Depth of Field
+
+The depth of field shader is not too sophisticated, but here's how it works.
+
+The blur effect is a two-pass gaussian blur, which is identical to a one-pass
+version but more performant. Since it is running in-game, it is able to use
+the player's position to determine where on screen should be blurred. This
+means that if you move to the top or bottom of the screen, that portion will
+come into focus as you get closer (but the other end of the screen will not
+become more blurred).
+
+The blur intensity increases gradually once the Field threshold is crossed.
+The growth is quadratic, so the very low blur amounts right at the threshold
+may not be noticeable and may cause the field to appear wider than expected.
+After reaching the maximum allowed Intensity, the blur will stop getting
+stronger and will persist until reaching the edge of the screen.
+
+The blur applies only to the world layer, and not to the UI. Unfortunately, a
+few pieces of UI are rendered by the game on the world layer, so the shader
+blurs them (see Known Issues). I hope to address that in a future update.
 
 
 ## Compatibility
@@ -138,6 +168,11 @@ Features planned for (near) future updates:
     to adjust in concert.
 * Add a preview toggle button for the colorizer, to allow you to quickly a/b
     test a set of changes.
+
+A feature I would like to add, in an ideal world (don't count on it):
+
+* Adding enough of a depth map to the game that the depth of field effect can
+    look more convincing.
 
 
 ## Performance
