@@ -66,13 +66,13 @@ float4 Gauss(float4 inputColor, float2 UV, float2 dir, float2 field)
 float4 GaussH(VS_OUTPUT input) : COLOR
 {
     return Gauss(input.Color, input.UV, float2(PitchX, 0.0),
-            float2(Center - Field/2.0, Center + Field/2.0));
+            float2(min(Center, 0.5) - Field/2.0, max(Center, 0.5) + Field/2.0));
 }
 
 float4 GaussV(VS_OUTPUT input) : COLOR
 {
     return Gauss(input.Color, input.UV, float2(0.0, PitchY),
-            float2(Center - Field/2.0, Center + Field/2.0));
+            float2(min(Center, 0.5) - Field/2.0, max(Center, 0.5) + Field/2.0));
 }
 
 technique GaussH
