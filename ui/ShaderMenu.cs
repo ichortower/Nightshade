@@ -9,7 +9,7 @@ namespace ichortower.ui
 {
     public class ShaderMenu : IClickableMenu
     {
-        public static int defaultWidth = 400;
+        public static int defaultWidth = 420;
         public static int defaultHeight = 720 - 64;
         public static int defaultX = 32;
         public static int defaultY = 32;
@@ -122,7 +122,7 @@ namespace ichortower.ui
             var colorBalance = TR.Get("menu.ColorBalance.Hover");
             var lbl_cyan = new Label(this, new Rectangle(20, y, 24, 60),
                     text: "C", hoverText: colorBalance);
-            var lbl_red = new Label(this, new Rectangle(296, y, 24, 60),
+            var lbl_red = new Label(this, new Rectangle(308, y, 24, 60),
                     text: "R", hoverText: colorBalance);
             var sld_redShadow = new Slider(this, 48, y, name: "ShadowR");
             var sld_redMidtone = new Slider(this, 48, y+20, name: "MidtoneR");
@@ -130,7 +130,7 @@ namespace ichortower.ui
             y += 60 + 8;
             var lbl_magenta = new Label(this, new Rectangle(20, y, 24, 60),
                     text: "M", hoverText: colorBalance);
-            var lbl_green = new Label(this, new Rectangle(296, y, 24, 60),
+            var lbl_green = new Label(this, new Rectangle(308, y, 24, 60),
                     text: "G", hoverText: colorBalance);
             var sld_greenShadow = new Slider(this, 48, y, name: "ShadowG");
             var sld_greenMidtone = new Slider(this, 48, y+20, name: "MidtoneG");
@@ -138,7 +138,7 @@ namespace ichortower.ui
             y += 60 + 8;
             var lbl_yellow = new Label(this, new Rectangle(20, y, 24, 60),
                     text: "Y", hoverText: colorBalance);
-            var lbl_blue = new Label(this, new Rectangle(296, y, 24, 60),
+            var lbl_blue = new Label(this, new Rectangle(308, y, 24, 60),
                     text: "B", hoverText: colorBalance);
             var sld_blueShadow = new Slider(this, 48, y, name: "ShadowB");
             var sld_blueMidtone = new Slider(this, 48, y+20, name: "MidtoneB");
@@ -149,6 +149,8 @@ namespace ichortower.ui
                     new string[] {}, parent: this);
             y += 2 + 16;
 
+            // magic centering for when the future fifth button is added
+            buttonY += 7;
             var btn_revert = new IconButton(this, defaultWidth-50, buttonY,
                     iconIndex: 0, hoverText: TR.Get("menu.RevertButton.Hover"),
                     onClick: RevertCurrentProfile);
