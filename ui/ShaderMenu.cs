@@ -108,11 +108,13 @@ namespace ichortower.ui
                     new Rectangle(20, y, 128, 20),
                     text: TR.Get("menu.Lightness.Text"));
             var sld_lightness = new Slider(this, 156, y, name: "Lightness");
+            sld_lightness.Range = new int[]{-80, 80};
             y += lbl_lightness.Bounds.Height + 8;
             var lbl_contrast = new Label(this,
                     new Rectangle(20, y, 128, 20),
                     text: TR.Get("menu.Contrast.Text"));
             var sld_contrast = new Slider(this, 156, y, name: "Contrast");
+            sld_contrast.Range = new int[]{-80, 80};
             y += lbl_contrast.Bounds.Height + 16;
 
             int buttonY = y;
