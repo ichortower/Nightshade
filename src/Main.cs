@@ -62,27 +62,6 @@ namespace ichortower
                     postfix: post);
 
             sb = new SpriteBatch(Game1.graphics.GraphicsDevice);
-            /*
-            MethodInfo Game1__draw = typeof(Game1).GetMethod("_draw",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-            var pre = new HarmonyMethod(typeof(InShade), "Game1__draw_Prefix");
-            var post = new HarmonyMethod(typeof(InShade), "Game1__draw_Postfix");
-            harmony.Patch(Game1__draw, prefix: pre, postfix: post);
-            */
-            /*
-            MethodInfo Game1DrawWorld = typeof(Game1).GetMethod("DrawWorld",
-                    BindingFlags.Public | BindingFlags.Instance);
-            var pre = new HarmonyMethod(typeof(InShade), "Game1_DrawWorld_Prefix");
-            var post = new HarmonyMethod(typeof(InShade), "Game1_DrawWorld_Postfix");
-            harmony.Patch(Game1DrawWorld, prefix: pre, postfix: post);
-            */
-            /*
-            MethodInfo target = typeof(SpriteBatch).GetMethod("Begin",
-                    BindingFlags.Public | BindingFlags.Instance);
-            var Postfix = new HarmonyMethod(typeof(InShade),
-                    "SpriteBatch_Begin_Postfix");
-            harmony.Patch(target, postfix: Postfix);
-            */
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.Specialized.LoadStageChanged += this.OnLoadStageChanged;
             helper.Events.GameLoop.Saved += this.OnSaved;
