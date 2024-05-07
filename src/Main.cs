@@ -62,21 +62,22 @@ namespace ichortower
                     postfix: post);
 
             sb = new SpriteBatch(Game1.graphics.GraphicsDevice);
-            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
-            helper.Events.Specialized.LoadStageChanged += this.OnLoadStageChanged;
-            helper.Events.GameLoop.Saved += this.OnSaved;
-            helper.Events.Display.Rendered += this.OnRendered;
-            helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
-            helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Content.AssetReady += this.OnAssetReady;
+            helper.Events.Display.Rendered += this.OnRendered;
+            helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+            helper.Events.GameLoop.Saved += this.OnSaved;
+            helper.Events.Specialized.LoadStageChanged += this.OnLoadStageChanged;
+            helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
+            helper.Events.Player.Warped += this.OnPlayerWarped;
         }
 
         public void ApplyConfig(ModConfig conf)
         {
             int index = conf.ColorizerActiveProfile;
             if (conf.ColorizeBySeason) {
-                index = Game1.seasonIndex;
+                index = Game1.currentLocation?.GetSeasonIndex() ?? Game1.seasonIndex;
             }
             ColorizerPreset active = conf.ColorizerProfiles[index];
             ColorShader.Parameters["Saturation"].SetValue(active.Saturation);
@@ -111,6 +112,13 @@ namespace ichortower
         public void OnSaved(object sender, SavedEventArgs e)
         {
             ApplyConfig(Nightshade.Config);
+        }
+
+        public void OnPlayerWarped(object sender, WarpedEventArgs e)
+        {
+            if (e.IsLocalPlayer) {
+                ApplyConfig(Nightshade.Config);
+            }
         }
 
         public void OnAssetRequested(object sender, AssetRequestedEventArgs e)
