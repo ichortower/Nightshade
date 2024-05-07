@@ -20,18 +20,24 @@ namespace ichortower.ui
             this.Text = text;
             this.HoverText = hoverText;
             this.ActivateWidget = activate;
+            _resize();
+        }
+
+        private void _resize()
+        {
+            Vector2 dimen = Game1.smallFont.MeasureString(Text);
+            Bounds.Width = Math.Max(Bounds.Width, (int)dimen.X);
         }
 
         public override void draw(SpriteBatch b)
         {
-            Vector2 dimen = Game1.smallFont.MeasureString(this.Text);
-            this.Bounds.Width = Math.Max(this.Bounds.Width, (int)dimen.X);
+            _resize();
             Rectangle screenb = new(
                     (this.parent?.xPositionOnScreen ?? 0) + this.Bounds.X,
                     (this.parent?.yPositionOnScreen ?? 0) + this.Bounds.Y,
                     this.Bounds.Width,
                     this.Bounds.Height);
-            int xw = (int)dimen.X;
+            int xw = Bounds.Width;
             Vector2 screenpos = new(
                     this.HAlign switch {
                         Alignment.Left => screenb.X,

@@ -99,6 +99,9 @@ namespace ichortower.ui
                 int dx = (int)Game1.smallFont.MeasureString(Labels[i]).X + 7;
                 if (x > start && x < start + dx) {
                     this.FocusedIndex = i;
+                    if (this.parent is ShaderMenu m) {
+                        m.onChildChange(this);
+                    }
                     break;
                 }
                 start += dx;

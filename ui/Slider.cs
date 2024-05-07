@@ -22,22 +22,23 @@ namespace ichortower.ui
             }
         }
 
-        public Func<string> ValueDelegate = null;
+        public Func<int, string> ValueDelegate = null;
 
-        public Slider(IClickableMenu parent, int xpos, int ypos, int initial)
+        public Slider(IClickableMenu parent, int xpos, int ypos,
+                string name = "", int initial = 0)
             : this(parent, new Rectangle(xpos, ypos, Slider.defaultWidth, Slider.defaultHeight),
-                    initial)
+                    name, initial)
         {
         }
 
-        public Slider(IClickableMenu parent, Rectangle bounds, int initial, int[] range = null)
-            : base(parent)
+        public Slider(IClickableMenu parent, Rectangle bounds,
+                string name = "", int initial = 0, int[] range = null)
+            : base(parent, bounds, name)
         {
             if (range != null && range.Length > 1) {
                 this.Range = new int[2] {range[0], range[1]};
             }
             this.Value = initial;
-            this.Bounds = bounds; 
         }
 
         public override void draw(SpriteBatch b)
@@ -63,7 +64,7 @@ namespace ichortower.ui
             b.Draw(Game1.mouseCursors, color: Color.White,
                     sourceRectangle: new Rectangle(boxX+7, 256, 3, 10),
                     destinationRectangle: new Rectangle(screenb.X + dist, screenb.Y, 6, 20));
-            string disp = this.ValueDelegate?.Invoke() ?? $"{this.Value}";
+            string disp = this.ValueDelegate?.Invoke(this.Value) ?? $"{this.Value}";
             Utility.drawTextWithShadow(b, disp, Game1.smallFont,
                     new Vector2(screenb.X + screenb.Width + 4, screenb.Y - 4),
                     Game1.textColor);
@@ -71,8 +72,12 @@ namespace ichortower.ui
 
         public override void click(int x, int y, bool playSound = true)
         {
+            int prev = this.Value;
             this.Value = (int)Utility.Lerp(Range[0], Range[1],
                     (float)(x-Bounds.X) / (float)Bounds.Width);
+            if (prev != this.Value && this.parent is ShaderMenu m) {
+                m.onChildChange(this);
+            }
         }
 
         public override void clickHold(int x, int y)
@@ -82,17 +87,30 @@ namespace ichortower.ui
 
         public override void keyPress(Keys key)
         {
-            if (Game1.options.doesInputListContain(Game1.options.moveRightButton, key)) {
+            int prev = this.Value;
+            if (key == Keys.Right || Game1.options.doesInputListContain(Game1.options.moveRightButton, key)) {
                 this.Value += 1;
             }
-            else if (Game1.options.doesInputListContain(Game1.options.moveLeftButton, key)) {
+            else if (key == Keys.Left || Game1.options.doesInputListContain(Game1.options.moveLeftButton, key)) {
                 this.Value -= 1;
+            }
+            if (prev != this.Value && this.parent is ShaderMenu m) {
+                m.onChildChange(this);
             }
         }
 
-        public string RenderAsFloat()
+        public override void scrollWheel(int direction)
         {
-            return string.Format("{0:0.00}", (float)Value/100f);
+            int prev = Value;
+            Value += Math.Sign(direction);
+            if (prev != Value && parent is ShaderMenu m) {
+                m.onChildChange(this);
+            }
+        }
+
+        public Func<int, string> FloatRenderer(float denom)
+        {
+            return (val) => string.Format("{0:0.00}", (float)val/denom);
         }
     }
 }

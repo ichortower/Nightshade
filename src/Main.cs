@@ -6,6 +6,7 @@ using StardewValley;
 using StardewValley.Mods;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Enums;
 using System;
 using System.IO;
 using System.Reflection;
@@ -22,16 +23,18 @@ namespace ichortower
 
         private static RenderTarget2D uiScreen = null;
         private static RenderTarget2D sceneScreen = null;
+        private static bool usingColorizeWorld = false;
+        private static bool usingColorizeUI = false;
+        private static bool usingDepthOfField = false;
 
-        private static ModConfig Config;
+        public static ModConfig Config;
 
-        public static IMonitor mon = null;
+        public static Nightshade instance;
 
         public override void Entry(IModHelper helper)
         {
-            mon = Monitor;
+            instance = this;
             ModId = this.ModManifest.UniqueID;
-            TR.Helper = helper;
             try {
                 byte[] stream = File.ReadAllBytes(Path.Combine(
                         helper.DirectoryPath, "assets/colorizer.mgfx"));
@@ -47,17 +50,7 @@ namespace ichortower
                 return;
             }
             Nightshade.Config = helper.ReadConfig<ModConfig>();
-
-            //InShade.ColorShader.Parameters["Saturation"].SetValue((float)-.3);
-            //InShade.ColorShader.Parameters["Lightness"].SetValue((float).5);
-            //InShade.ColorShader.Parameters["Contrast"].SetValue((float)-.2);
-            //InShade.ColorShader.Parameters["ShadowRgb"].SetValue(new Vector3(-.1f, 0f, .1f));
-            //InShade.ColorShader.Parameters["MidtoneRgb"].SetValue(new Vector3(-.1f, 0f, .1f));
-            //InShade.ColorShader.Parameters["HighlightRgb"].SetValue(new Vector3(-.1f, 0f, .1f));
-            //InShade.DofShader.Parameters["Field"].SetValue(0.6f);
-            //InShade.DofShader.Parameters["Ramp"].SetValue(0.16f);
-            //InShade.DofShader.Parameters["Intensity"].SetValue(6.0f);
-            //InShade.DofShader.Parameters["Center"].SetValue(0.5f);
+            ApplyConfig(Nightshade.Config);
 
             var harmony = new Harmony(this.ModManifest.UniqueID);
             MethodInfo Game1_ShouldDrawOnBuffer = typeof(Game1).GetMethod(
@@ -69,32 +62,63 @@ namespace ichortower
                     postfix: post);
 
             sb = new SpriteBatch(Game1.graphics.GraphicsDevice);
-            /*
-            MethodInfo Game1__draw = typeof(Game1).GetMethod("_draw",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-            var pre = new HarmonyMethod(typeof(InShade), "Game1__draw_Prefix");
-            var post = new HarmonyMethod(typeof(InShade), "Game1__draw_Postfix");
-            harmony.Patch(Game1__draw, prefix: pre, postfix: post);
-            */
-            /*
-            MethodInfo Game1DrawWorld = typeof(Game1).GetMethod("DrawWorld",
-                    BindingFlags.Public | BindingFlags.Instance);
-            var pre = new HarmonyMethod(typeof(InShade), "Game1_DrawWorld_Prefix");
-            var post = new HarmonyMethod(typeof(InShade), "Game1_DrawWorld_Postfix");
-            harmony.Patch(Game1DrawWorld, prefix: pre, postfix: post);
-            */
-            /*
-            MethodInfo target = typeof(SpriteBatch).GetMethod("Begin",
-                    BindingFlags.Public | BindingFlags.Instance);
-            var Postfix = new HarmonyMethod(typeof(InShade),
-                    "SpriteBatch_Begin_Postfix");
-            harmony.Patch(target, postfix: Postfix);
-            */
-            helper.Events.Display.Rendered += this.OnRendered;
-            //helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
-            helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
             helper.Events.Content.AssetReady += this.OnAssetReady;
+            helper.Events.Display.Rendered += this.OnRendered;
+            helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
+            helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+            helper.Events.GameLoop.Saved += this.OnSaved;
+            helper.Events.Specialized.LoadStageChanged += this.OnLoadStageChanged;
+            helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
+            helper.Events.Player.Warped += this.OnPlayerWarped;
+        }
+
+        public void ApplyConfig(ModConfig conf)
+        {
+            int index = conf.ColorizerActiveProfile;
+            if (conf.ColorizeBySeason) {
+                index = Game1.currentLocation?.GetSeasonIndex() ?? Game1.seasonIndex;
+            }
+            ColorizerPreset active = conf.ColorizerProfiles[index];
+            ColorShader.Parameters["Saturation"].SetValue(active.Saturation);
+            ColorShader.Parameters["Lightness"].SetValue(active.Lightness);
+            ColorShader.Parameters["Contrast"].SetValue(active.Contrast);
+            ColorShader.Parameters["ShadowRgb"].SetValue(new Vector3(
+                    active.ShadowR, active.ShadowG, active.ShadowB));
+            ColorShader.Parameters["MidtoneRgb"].SetValue(new Vector3(
+                    active.MidtoneR, active.MidtoneG, active.MidtoneB));
+            ColorShader.Parameters["HighlightRgb"].SetValue(new Vector3(
+                    active.HighlightR, active.HighlightG, active.HighlightB));
+            DofShader.Parameters["Field"].SetValue(conf.DepthOfFieldSettings.Field);
+            DofShader.Parameters["Intensity"].SetValue(conf.DepthOfFieldSettings.Intensity);
+
+            usingColorizeWorld = conf.ColorizeWorld;
+            usingColorizeUI = conf.ColorizeUI;
+            usingDepthOfField = conf.DepthOfFieldEnabled;
+        }
+
+        public void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            GMCMIntegration.Setup();
+        }
+
+        public void OnLoadStageChanged(object sender, LoadStageChangedEventArgs e)
+        {
+            if (e.NewStage == LoadStage.Preloaded) {
+                ApplyConfig(Nightshade.Config);
+            }
+        }
+
+        public void OnSaved(object sender, SavedEventArgs e)
+        {
+            ApplyConfig(Nightshade.Config);
+        }
+
+        public void OnPlayerWarped(object sender, WarpedEventArgs e)
+        {
+            if (e.IsLocalPlayer) {
+                ApplyConfig(Nightshade.Config);
+            }
         }
 
         public void OnAssetRequested(object sender, AssetRequestedEventArgs e)
@@ -111,10 +135,17 @@ namespace ichortower
             }
         }
 
-        public void EnsureBuffers(bool reallocate = false)
+        /*
+         * worldSource: the current render target for the world layer.
+         * during map screenshots, the game uses a separate buffer of a
+         * different size (UI layer not affected).
+         */
+        public void EnsureBuffers(RenderTarget2D worldSource, bool reallocate = false)
         {
-            int sw = Game1.game1.screen.Width;
-            int sh = Game1.game1.screen.Height;
+            // we probably don't need to null coalesce here, but better safe
+            // than sorry
+            int sw = (worldSource ?? Game1.game1.screen).Width;
+            int sh = (worldSource ?? Game1.game1.screen).Height;
             if (reallocate || sceneScreen is null || 
                     (sceneScreen.Width != sw || sceneScreen.Height != sh)) {
                 sceneScreen?.Dispose();
@@ -134,7 +165,9 @@ namespace ichortower
         [EventPriority(EventPriority.Low - 10)]
         public void OnRendered(object sender, RenderedEventArgs e)
         {
-            EnsureBuffers();
+            if (!usingColorizeWorld && !usingColorizeUI) {
+                return;
+            }
             // call End/Begin to flush any pending draws in the spritebatch.
             // otherwise, they won't be drawn until after our shader.
             // the parameters to Begin are known and are the same as the ones
@@ -144,58 +177,71 @@ namespace ichortower
             e.SpriteBatch.Begin(SpriteSortMode.Deferred,
                     BlendState.AlphaBlend,
                     SamplerState.PointClamp);
-
-            // save current render target for restoration later
+            // get current render target. we need to restore it later, and
+            // we need to read from and write back to it.
             RenderTarget2D savedTarget = null;
             RenderTargetBinding[] rt = Game1.graphics.GraphicsDevice.GetRenderTargets();
             if (rt.Length > 0) {
                 savedTarget = rt[0].RenderTarget as RenderTarget2D;
             }
+            EnsureBuffers(savedTarget);
 
-            // apply the shader by rendering the two framebuffers twice each:
-            // once to the appropriate back buffer, applying the shader, then
-            // again to re-render it (no shader) back to where it was.
-            // this is much more performant than trying to move or copy the
-            // data in some other way.
-            Game1.SetRenderTarget(sceneScreen);
-            sb.Begin(SpriteSortMode.Deferred,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp,
-                    effect: Nightshade.ColorShader);
-            sb.Draw(texture: Game1.game1.screen,
-                    position: Vector2.Zero,
-                    color: Color.White);
-            sb.End();
-            Game1.SetRenderTarget(Game1.game1.screen);
-            sb.Begin(SpriteSortMode.Deferred,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp);
-            sb.Draw(texture: sceneScreen,
-                    position: Vector2.Zero,
-                    color: Color.White);
-            sb.End();
+            // each layer (world, UI) is drawn to a separate back buffer and
+            // then back to where it was, due to infelicities in how the game
+            // handles its layer buffers. only one draw uses the shader: the
+            // other one is just a blit.
+            //
+            // it is important to do the world layer second: during map
+            // screenshots, the game renders to a target which is set to
+            // RenderTargetUsage.DiscardContents, so it is automatically cleared
+            // when it is set as the active render target; therefore we must
+            // only do so once.
+            if (usingColorizeUI) {
+                Game1.SetRenderTarget(uiScreen);
+                Game1.game1.GraphicsDevice.Clear(Color.Transparent);
+                sb.Begin(SpriteSortMode.Deferred,
+                        BlendState.AlphaBlend,
+                        SamplerState.PointClamp,
+                        effect: Nightshade.ColorShader);
+                sb.Draw(texture: Game1.game1.uiScreen,
+                        position: Vector2.Zero,
+                        color: Color.White);
+                sb.End();
+                Game1.SetRenderTarget(Game1.game1.uiScreen);
+                Game1.game1.GraphicsDevice.Clear(Color.Transparent);
+                sb.Begin(SpriteSortMode.Deferred,
+                        BlendState.AlphaBlend,
+                        SamplerState.PointClamp);
+                sb.Draw(texture: uiScreen,
+                        position: Vector2.Zero,
+                        color: Color.White);
+                sb.End();
+            }
 
-            Game1.SetRenderTarget(uiScreen);
-            Game1.game1.GraphicsDevice.Clear(Color.Transparent);
-            sb.Begin(SpriteSortMode.Deferred,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp,
-                    effect: Nightshade.ColorShader);
-            sb.Draw(texture: Game1.game1.uiScreen,
-                    position: Vector2.Zero,
-                    color: Color.White);
-            sb.End();
-            Game1.SetRenderTarget(Game1.game1.uiScreen);
-            Game1.game1.GraphicsDevice.Clear(Color.Transparent);
-            sb.Begin(SpriteSortMode.Deferred,
-                    BlendState.AlphaBlend,
-                    SamplerState.PointClamp);
-            sb.Draw(texture: uiScreen,
-                    position: Vector2.Zero,
-                    color: Color.White);
-            sb.End();
-
-            Game1.SetRenderTarget(savedTarget);
+            // the world layer runs the shader on the render back in, instead
+            // of the render out. I believe Game1.lightmap leaves the layer in
+            // a different state with alpha not premultiplied, so blitting it
+            // first puts it in the state the shader expects.
+            if (usingColorizeWorld) {
+                Game1.SetRenderTarget(sceneScreen);
+                Game1.game1.GraphicsDevice.Clear(Game1.bgColor);
+                sb.Begin(SpriteSortMode.Deferred,
+                        BlendState.AlphaBlend,
+                        SamplerState.PointClamp);
+                sb.Draw(texture: savedTarget,
+                        position: Vector2.Zero,
+                        color: Color.White);
+                sb.End();
+                Game1.SetRenderTarget(savedTarget);
+                sb.Begin(SpriteSortMode.Deferred,
+                        BlendState.AlphaBlend,
+                        SamplerState.PointClamp,
+                        effect: Nightshade.ColorShader);
+                sb.Draw(texture: sceneScreen,
+                        position: Vector2.Zero,
+                        color: Color.White);
+                sb.End();
+            }
         }
 
         // this is much like OnRendered, but it's for the depth-of-field
@@ -203,18 +249,24 @@ namespace ichortower
         [EventPriority(EventPriority.Low - 10)]
         public void OnRenderedWorld(object sender, RenderedWorldEventArgs e)
         {
-            EnsureBuffers();
+            if (!usingDepthOfField) {
+                return;
+            }
+            if (Game1.game1.takingMapScreenshot) {
+                return;
+            }
+            // flush pending draws
             e.SpriteBatch.End();
             e.SpriteBatch.Begin(SpriteSortMode.Deferred,
                     BlendState.AlphaBlend,
                     SamplerState.PointClamp);
-
             // save current render target for restoration later
             RenderTarget2D savedTarget = null;
             RenderTargetBinding[] rt = Game1.graphics.GraphicsDevice.GetRenderTargets();
             if (rt.Length > 0) {
                 savedTarget = rt[0].RenderTarget as RenderTarget2D;
             }
+            EnsureBuffers(savedTarget);
 
             Nightshade.DofShader.Parameters["PitchX"]?.SetValue(
                     1f / (float)sceneScreen.Width);
@@ -223,6 +275,9 @@ namespace ichortower
             float ypos = Game1.player.getLocalPosition(Game1.viewport).Y;
             ypos += Game1.player.GetBoundingBox().Height / 2;
             ypos /= Game1.viewport.Height;
+            if (ypos < 0f || ypos > 1.0f) {
+                ypos = 0.5f;
+            }
             Nightshade.DofShader.Parameters["Center"].SetValue(ypos);
 
             DofShader.CurrentTechnique = DofShader.Techniques[0];
@@ -262,11 +317,9 @@ namespace ichortower
             if (Game1.activeClickableMenu != null) {
                 return;
             }
-            foreach (var button in e.Pressed) {
-                if (button == SButton.H) {
-                    ui.ShaderMenu cfg = new();
-                    Game1.activeClickableMenu = cfg;
-                }
+            if (Config.MenuKeybind.JustPressed()) {
+                ui.ShaderMenu cfg = new();
+                Game1.activeClickableMenu = cfg;
             }
         }
 

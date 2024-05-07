@@ -10,10 +10,9 @@ namespace ichortower.ui
         public static string Sound = "drumkit6";
         public bool Value;
 
-        public Checkbox(int x, int y, IClickableMenu parent = null, bool Value = false)
-            : base(parent)
+        public Checkbox(IClickableMenu parent, int x, int y, string name = "", bool Value = false)
+            : base(parent, new Rectangle(x, y, 27, 27), name)
         {
-            this.Bounds = new Rectangle(x, y, 27, 27);
             this.Value = Value;
         }
 
@@ -35,6 +34,9 @@ namespace ichortower.ui
             this.Value = !this.Value;
             if (playSound) {
                 Game1.playSound(Checkbox.Sound);
+            }
+            if (this.parent is ShaderMenu m) {
+                m.onChildChange(this);
             }
         }
     }
