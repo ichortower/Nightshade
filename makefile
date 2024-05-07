@@ -3,6 +3,7 @@ MOD_DIR=${GAME_DIR}/Mods/Nightshade
 
 install: shaders
 	dotnet build /clp:NoSummary
+	install -m 644 LICENSE "${MOD_DIR}"
 
 shaders: assets/colorizer.mgfx assets/depthoffield.mgfx
 
