@@ -1,6 +1,8 @@
 # Nightshade: in-game color reshader
 
-image here
+![The player is standing in Pelican Town with the Nightshade config menu open,
+showing the slider color settings in use to recolor the
+game](images/example_summer.png)
 
 This mod adds a highly configurable pixel shader to the game, allowing you to
 adjust saturation, lightness, contrast, and color balance live during gameplay.
@@ -51,7 +53,8 @@ values to affect the game's render in real time).
 
 The default keybinding is H. Press it during gameplay to open the menu:
 
-image here
+![A shot of the Nightshade menu, showing all of its sliders and buttons in
+detail](images/example_menu.png)
 
 There are a lot of controls. Here is an explanation of how they work.
 
@@ -64,6 +67,9 @@ There are a lot of controls. Here is an explanation of how they work.
     Season is enabled, the profiles will be mapped, in order, to Spring,
     Summer, Fall, and Winter (the tab titles will change to reflect this). In
     the appropriate season, that profile will be applied automatically.
+
+    Note that at the title screen, the game's current season is Spring, so
+    that profile will apply if this setting is toggled on.
 * **Profile Switcher** \
     Switch between color profiles. Whichever one you select will be rendered
     live while the menu is open, even if Colorize By Season is on and it
@@ -110,6 +116,10 @@ There are a lot of controls. Here is an explanation of how they work.
     of the current active season. If you are viewing a profile from another
     season when you exit, the mod will immediately switch to the one matching
     the season.
+
+If you would like, you **can** edit Nightshade's config.json by hand. However,
+please note that the values in the config are mostly floating-point, even
+though the UI presents most of them as integers.
 
 
 ## Depth of Field
@@ -168,6 +178,8 @@ Features planned for (near) future updates:
     to adjust in concert.
 * Add a preview toggle button for the colorizer, to allow you to quickly a/b
     test a set of changes.
+* Find a good way to open Nightshade's menu from within GMCM, instead of the
+    little text blurb telling you about it.
 
 A feature I would like to add, in an ideal world (don't count on it):
 
