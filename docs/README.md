@@ -20,7 +20,7 @@ plants](https://en.wikipedia.org/wiki/Solanaceae).
 
 A very big thank you goes out to my lovely beta testers, who agreed to try out
 this mod before it was ready for general release, and who helped me find bugs
-and improve the mod:
+and make improvements:
 
 - burntcheese.
 - .cozy.with.zoe
@@ -44,8 +44,8 @@ Of course, you will need to have SMAPI 4.0+ and Stardew Valley 1.6+.
 
 Nightshade hooks into [Generic Mod Config
 Menu](https://www.nexusmods.com/stardewvalley/mods/5098) if you have it
-installed. However, that menu only allows you to configure the keybinding
-which will open Nightshade's custom config menu (implementing this menu was
+installed. However, the submenu only allows you to configure the keybinding
+which will open Nightshade's custom config menu (implementing my own menu was
 required in order to 1. avoid blocking too much of the screen, and 2. allow
 values to affect the game's render in real time).
 
@@ -57,22 +57,51 @@ There are a lot of controls. Here is an explanation of how they work.
 
 * **Colorize World/Colorize UI** \
     You can independently toggle whether the color settings apply to the world
-    layer and the UI layer.
+    layer and the UI layer. They will use the same profile; in a future update,
+    I plan to allow them to use different ones.
 * **Colorize By Season** \
     Nightshade saves up to four color profiles in its config.json. If Colorize
-    By Season is enabled, the profiles will be mapped in order to Spring,
+    By Season is enabled, the profiles will be mapped, in order, to Spring,
     Summer, Fall, and Winter (the tab titles will change to reflect this). In
     the appropriate season, that profile will be applied automatically.
 * **Profile Switcher** \
     Switch between color profiles. Whichever one you select will be rendered
-    live, even if Colorize By Season is on and it doesn't match the current
-    season. If Colorize By Season is disabled, the selected profile will be
-    saved (see Save) as the active profile and will apply at all times.
+    live while the menu is open, even if Colorize By Season is on and it
+    doesn't match the current season. If Colorize By Season is disabled, the
+    selected profile will be saved (see Save) as the active profile and will
+    apply at all times.
 * **Saturation/Lightness/Contrast** \
-    Adjust the three
-    Adjust saturation of the game's colors. Range: -100 to 100.
-* **Lightness** \
-    Adjust saturation of the game's colors. Range: -80 to 80.
+    Adjust the overall saturation of colors, overall darkness/lightness of the
+    game, and overall color contrast. These sliders apply equally to the entire
+    game canvas.
+* **Color Balance (CMY/RGB)** \
+    These nine sliders allow you to adjust the balance between the primary
+    RGB colors and their complements (CMY). Each group represents one pair
+    (cyan-red, magenta-green, and yellow-blue), and in each group are three
+    sliders, controlling (from top to bottom) shadows, midtones, and
+    highlights, giving you fine-grained control.
+* **Revert** \
+    When you open the config menu, the current state of the four profiles is
+    saved in memory. At any time, clicking this button will return the current
+    profile to that saved state.
+* **Clear** \
+    Resets all color sliders in the current profile to zero.
+* **Copy** \
+    Copies the current state of the color sliders to an in-memory buffer.
+* **Paste** \
+    Applies the contents of the in-memory buffer to the current color profile.
+* **Depth of Field** \
+    Enables or disables the depth of field shader.
+* **Field** \
+    Controls how much of the screen is fully in focus (not blurred). This is a
+    minimum amount, since the player's position affects the field too (see the
+    Depth of Field section for details).
+* **Intensity** \
+    Controls how strong the blur effect is, at maximum. After leaving the
+    field, the blur gradually intensifies until it reaches this maximum.
+
+
+## Depth of Field
 
 
 ## Compatibility
@@ -88,14 +117,27 @@ I don't have a list of such mods, so please let me know if you find an
 incompatible one.
 
 
+## Known Issues
+
+During skippable cutscenes, the Skip button in the lower corner of the screen
+is rendered on the world layer, which means the depth of field shader will
+blur it if enabled. I hope to patch this in a future update.
+
+The mine/skull cavern level indicator in the upper corner of the screen also
+suffers this problem. I hope to patch this one as well.
+
+
 ## Roadmap
 
 Features planned for (near) future updates:
 
 * Allow different color profiles to apply to the world and UI layers.
-* Allow loading of color presets from separate json files in a subdirectory.
+* Allow saving and loading of color presets from a subdirectory of json files.
 * Bundle some presets with the mod.
-* Patch some game functions to move
+* Implement a locking feature on the color balance groups to make them easier
+    to adjust in concert.
+* Add a preview toggle button for the colorizer, to allow you to quickly a/b
+    test a set of changes.
 
 
 ## Performance
@@ -103,8 +145,8 @@ Features planned for (near) future updates:
 This mod adds two pixel shaders, and to employ them it adds up to seven
 full-screen draw calls per frame, four of which run the shaders (the remaining
 three are just blits, to get pixels to another texture). These draws and
-shaders have a cost, so if your computer is using an integrated or weak GPU,
-you may drop frames with everything enabled.
+shaders have a cost, so if your computer is using an integrated or weak GPU
+like mine, you may drop frames with everything enabled.
 
 In this case, your best bet is to disable shaders you can live without: turning
 off either colorizer layer saves one shader draw and one blit, and turning off
