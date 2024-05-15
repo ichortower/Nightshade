@@ -1,0 +1,32 @@
+{
+  "menu.Colorizer.Text": "ระบายสี:",
+  "menu.ColorizeWorld.Text": "โลก",
+  "menu.ColorizeWorld.Hover": "ใช้เฉดสีบนเลเยอร์โลก",
+  "menu.ColorizeUI.Text": "UI",
+  "menu.ColorizeUI.Hover": "ใช้เฉดสีกับเลเยอร์ UI (เมนู, HUD)",
+  "menu.ColorizeBySeason.Text": "ระบายสีตามฤดูกาล",
+  "menu.ColorizeBySeason.Hover": "เมื่อเปิดใช้งาน โปรไฟล์ทั้ง 4 จะถูกใช้โดยอัตโนมัติ สำหรับ ฤดูใบไม้ผลิ ฤดูร้อน ฤดูใบไม้ร่วง และฤดูหนาว ตามลำดับ",
+
+  "menu.Saturation.Text": "ความอิ่มตัว",
+  "menu.Lightness.Text": "ความสว่าง",
+  "menu.Contrast.Text": "การตัดกัน",
+  "menu.ColorBalance.Hover": "ความสมดุลของสี^ในแต่ละกลุ่มสี (ฟ้า-แดง ม่วงแดง-เขียว และเหลือง-น้ำเงิน) แถบเลื่อนทั้งสามจะควบคุมเงา โทนสีกลาง และไฮไลท์ ตามลำดับ",
+  "menu.RevertButton.Hover": "เปลี่ยนกลับ^รีเซ็ตแถบเลื่อนสีทั้งหมดเป็น สถานะเดิม เมื่อคุณโหลด โปรไฟล์นี้",
+  "menu.ClearButton.Hover": "ล้างค่า^รีเซ็ตแถบเลื่อนสีทั้งหมดให้เป็น ศูนย์",
+  "menu.CopyButton.Hover": "คัดลอก^คัดลอกสถานะของแถบเลื่อนสี",
+  "menu.PasteButton.Hover": "วาง^วางสถานะของแถบเลื่อนสี",
+  "menu.PreviewToggle.Hover": "ดูตัวอย่าง^เมื่อใช้งานอยู่ ให้ใช้สถานะปัจจุบันของแถบเลื่อนสี (สลับสิ่งนี้เพื่อสลับระหว่างสถานะเริ่มต้นและการตั้งค่าปัจจุบัน)",
+
+  "menu.EnableDepthOfField.Text": "ความชัดลึก",
+  "menu.Field.Text": "ระยะ",
+  "menu.Field.Hover": "ระยะชัดลึก: เช่น หน้าจออยู่ใน โฟกัสเต็มที่มากน้อยเพียงใด? (ไม่เบลอ)",
+  "menu.Intensity.Text": "ความเข้ม",
+  "menu.Intensity.Hover": "เอฟเฟกต์เบลอนั้นทรงพลัง แค่ไหน (ในระดับสูงสุด)",
+  "menu.Save.Text": "บันทึก",
+
+  "gmcm.MenuKeybind.name": "ปุ่มลัดเมนู",
+  "gmcm.MenuKeybind.tooltip": "การผูกปุ่มเพื่อเปิดเมนู Nightshade",
+  "gmcm.Explainer.text": "Nightshade มีเมนูกำหนดค่าของตัวเอง ซึ่งแสดงตัวอย่างการตั้งค่าแถบเลื่อนแบบสด โปรดใช้เมนูนั้นหลังจากกำหนดค่าการผูกปุ่มที่เหมาะสม",
+
+  "EOF": ""
+}
