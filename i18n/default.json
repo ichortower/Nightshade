@@ -4,8 +4,10 @@
   "menu.ColorizeWorld.Hover": "Apply the color shader to the world layer.",
   "menu.ColorizeUI.Text": "UI",
   "menu.ColorizeUI.Hover": "Apply the color shader to the UI layer (menus, HUD).",
-  "menu.ColorizeBySeason.Text": "Colorize By Season",
-  "menu.ColorizeBySeason.Hover": "When enabled, the four profiles will be used automatically for Spring, Summer, Fall, and Winter, respectively.",
+  "menu.ColorizeBySeason.Text": "By Season",
+  "menu.ColorizeBySeason.Hover": "When enabled, the first four profiles will be used automatically for Spring, Summer, Fall, and Winter, respectively.",
+  "menu.ColorizeIndoors.Text": "Indoors",
+  "menu.ColorizeIndoors.Hover": "When enabled, the fifth profile will be used automatically when in an indoor location.",
 
   "menu.Saturation.Text": "Saturation",
   "menu.Lightness.Text": "Lightness",

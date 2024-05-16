@@ -49,7 +49,8 @@ namespace ichortower
                 Monitor.Log(e.ToString(), LogLevel.Error);
                 return;
             }
-            Nightshade.Config = helper.ReadConfig<ModConfig>();
+            ModConfig conf = helper.ReadConfig<ModConfig>();
+            Nightshade.Config = ModConfig.ApplyMigrations(conf);
             ApplyConfig(Nightshade.Config);
 
             var harmony = new Harmony(this.ModManifest.UniqueID);
@@ -78,6 +79,9 @@ namespace ichortower
             int index = conf.ColorizerActiveProfile;
             if (conf.ColorizeBySeason) {
                 index = Game1.currentLocation?.GetSeasonIndex() ?? Game1.seasonIndex;
+            }
+            if (conf.ColorizeIndoors && (!Game1.currentLocation?.IsOutdoors ?? false)) {
+                index = 4;
             }
             ColorizerPreset active = conf.ColorizerProfiles[index];
             ColorShader.Parameters["Saturation"].SetValue(active.Saturation);

@@ -9,13 +9,31 @@ namespace ichortower
         public bool ColorizeWorld = true;
         public bool ColorizeUI = true;
         public bool ColorizeBySeason = true;
+        public bool ColorizeIndoors = true;
         public int ColorizerActiveProfile = 0;
-        public ColorizerPreset[] ColorizerProfiles = new ColorizerPreset[4] {
-            new(), new(), new(), new(),
+        public ColorizerPreset[] ColorizerProfiles = new ColorizerPreset[5] {
+            new(), new(), new(), new(), new(),
         };
 
         public bool DepthOfFieldEnabled = false;
         public DepthOfFieldPreset DepthOfFieldSettings = new();
+
+        public static ModConfig ApplyMigrations(ModConfig conf)
+        {
+            if (conf.ColorizerProfiles.Length < 5) {
+                ColorizerPreset[] arr = new ColorizerPreset[5];
+                for (int i = 0; i < 5; ++i) {
+                    if (i < conf.ColorizerProfiles.Length) {
+                        arr[i] = conf.ColorizerProfiles[i].Clone();
+                    }
+                    else {
+                        arr[i] = new();
+                    }
+                }
+                conf.ColorizerProfiles = arr;
+            }
+            return conf;
+        }
     }
 
     public sealed class ColorizerPreset

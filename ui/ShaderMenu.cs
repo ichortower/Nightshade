@@ -17,18 +17,19 @@ namespace ichortower.ui
         public static Texture2D IconTexture = null;
 
         private List<Widget> children = new();
-        // references to the two child widgets that have interop
+        // references to the child widgets that have interop
         private Checkbox bySeasonToggle = null;
+        private Checkbox byIndoorsToggle = null;
         private TabBar seasonSwitcher = null;
 
         private Widget heldChild = null;
         private Widget keyedChild = null;
 
-        private ColorizerPreset[] ColorizerInitialStates = new ColorizerPreset[4] {
-            new(), new(), new(), new()
+        private ColorizerPreset[] ColorizerInitialStates = new ColorizerPreset[5] {
+            new(), new(), new(), new(), new(),
         };
-        private ColorizerPreset[] ColorizerActiveStates = new ColorizerPreset[4] {
-            new(), new(), new(), new()
+        private ColorizerPreset[] ColorizerActiveStates = new ColorizerPreset[5] {
+            new(), new(), new(), new(), new(),
         };
 
         private ColorizerPreset CopyPasteBuffer = null;
@@ -80,7 +81,8 @@ namespace ichortower.ui
                     hoverText: TR.Get("menu.ColorizeUI.Hover"),
                     activate: chk_colorizeUI);
             y += lbl_colorizer.Bounds.Height + 8;
-            x = 20;
+
+            x = 20 + 40 + 16;
             var chk_colorBySeason = new Checkbox(this, x, y, "ColorizeBySeason");
             bySeasonToggle = chk_colorBySeason;
             x += chk_colorBySeason.Bounds.Width + 8;
@@ -89,11 +91,20 @@ namespace ichortower.ui
                     text: TR.Get("menu.ColorizeBySeason.Text"),
                     hoverText: TR.Get("menu.ColorizeBySeason.Hover"),
                     activate: chk_colorBySeason);
+            x += lbl_colorBySeason.Bounds.Width + 16;
+            var chk_colorizeIndoors = new Checkbox(this, x, y, "ColorizeIndoors");
+            byIndoorsToggle = chk_colorizeIndoors;
+            x += chk_colorizeIndoors.Bounds.Width + 8;
+            var lbl_colorizeIndoors = new Label(this,
+                    new Rectangle(x, y, 0, 27),
+                    text: TR.Get("menu.ColorizeIndoors.Text"),
+                    hoverText: TR.Get("menu.ColorizeIndoors.Hover"),
+                    activate: chk_colorizeIndoors);
             y += chk_colorBySeason.Bounds.Height + 16;
 
             var tbr_profiles = new TabBar(
                     new Rectangle(4, y, defaultWidth-8, 39),
-                    new string[] {" 1 ", " 2 ", " 3 ", " 4 "},
+                    new string[] {" 1 ", " 2 ", " 3 ", " 4 ", " 5 "},
                     parent: this);
             seasonSwitcher = tbr_profiles;
             y += tbr_profiles.Bounds.Height + 16;
@@ -200,6 +211,7 @@ namespace ichortower.ui
                 lbl_colorizer, lbl_colorizeWorld, chk_colorizeWorld,
                 lbl_colorizeUI, chk_colorizeUI,
                 lbl_colorBySeason, chk_colorBySeason,
+                lbl_colorizeIndoors, chk_colorizeIndoors,
                 tbr_profiles,
                 lbl_saturation, sld_saturation,
                 lbl_lightness, sld_lightness,
@@ -230,6 +242,9 @@ namespace ichortower.ui
                     case "ColorizeUI":
                         ch.Value = Nightshade.Config.ColorizeUI;
                         break;
+                    case "ColorizeIndoors":
+                        ch.Value = Nightshade.Config.ColorizeIndoors;
+                        break;
                     case "ColorizeBySeason":
                         ch.Value = Nightshade.Config.ColorizeBySeason;
                         break;
@@ -245,7 +260,10 @@ namespace ichortower.ui
                 ColorizerActiveStates[i] = ColorizerInitialStates[i].Clone();
             }
             setSwitcherLabels();
-            if (bySeasonToggle.Value) {
+            if (byIndoorsToggle.Value) {
+                seasonSwitcher.FocusedIndex = 4;
+            }
+            else if (bySeasonToggle.Value) {
                 seasonSwitcher.FocusedIndex = Game1.seasonIndex;
             }
             else {
@@ -441,7 +459,7 @@ namespace ichortower.ui
 
         public void onChildChange(Widget child)
         {
-            if (child == bySeasonToggle) {
+            if (child == bySeasonToggle || child == byIndoorsToggle) {
                 setSwitcherLabels();
                 return;
             }
@@ -523,17 +541,22 @@ namespace ichortower.ui
 
         private void setSwitcherLabels()
         {
-            if (bySeasonToggle.Value) {
-                string pf = "Strings\\StringsFromCSFiles";
-                seasonSwitcher.Labels = new string[] {
-                    Utility.capitalizeFirstLetter(Game1.content.LoadString(pf+":spring")),
-                    Utility.capitalizeFirstLetter(Game1.content.LoadString(pf+":summer")),
-                    Utility.capitalizeFirstLetter(Game1.content.LoadString(pf+":fall")),
-                    Utility.capitalizeFirstLetter(Game1.content.LoadString(pf+":winter")),
-                };
-            }
-            else {
-                seasonSwitcher.Labels = new string[] {" 1 ", " 2 ", " 3 ", " 4 "};
+            for (int i = 0; i < 5; ++i) {
+                string lbl = $" {i+1} ";
+                if (i == 4 ) {
+                    lbl = (byIndoorsToggle.Value ? TabBar.IndoorLabel : " 5 ");
+                }
+                else if (bySeasonToggle.Value) {
+                    string key = i switch {
+                        1 => "summer",
+                        2 => "fall",
+                        3 => "winter",
+                        _ => "spring"
+                    };
+                    lbl = Utility.capitalizeFirstLetter(Game1.content.LoadString(
+                            $"Strings\\StringsFromCSFiles:{key}"));
+                }
+                seasonSwitcher.Labels[i] = lbl;
             }
         }
 

@@ -8,6 +8,14 @@ namespace ichortower.ui
 {
     public class TabBar : Widget
     {
+        public static string IndoorLabel = ":I:";
+        public static int GetTextWidth(string text) {
+            if (text.Equals(IndoorLabel)) {
+                return 34;
+            }
+            return (int)Game1.smallFont.MeasureString(text).X;
+        }
+
         public string[] Labels;
 
         private int _focusedIndex;
@@ -49,7 +57,8 @@ namespace ichortower.ui
 
         public int drawFocusedTab(SpriteBatch b, string text, int xoff)
         {
-            int textWidth = (int)Game1.smallFont.MeasureString(text).X;
+            bool useIcon = text.Equals(TabBar.IndoorLabel);
+            int textWidth = GetTextWidth(text);
             int x = (this.parent?.xPositionOnScreen ?? 0) + this.Bounds.X + xoff;
             int y = (this.parent?.yPositionOnScreen ?? 0) + this.Bounds.Y;
             b.Draw(Game1.menuTexture, color: Color.White,
@@ -61,21 +70,36 @@ namespace ichortower.ui
             b.Draw(Game1.menuTexture, color: Color.White,
                     sourceRectangle: new Rectangle(48, 268, 4, 36),
                     destinationRectangle: new Rectangle(x+textWidth+5, y+1, 2, this.Bounds.Height-3));
-            Utility.drawTextWithShadow(b, text, Game1.smallFont,
-                    new Vector2(x+4, y+2), Game1.textColor);
+            if (useIcon) {
+                b.Draw(ShaderMenu.IconTexture, color: Game1.textColor,
+                        sourceRectangle: new Rectangle(110, 0, 22, 22),
+                        destinationRectangle: new Rectangle(x+10, y+6, 22, 22));
+            }
+            else {
+                Utility.drawTextWithShadow(b, text, Game1.smallFont,
+                        new Vector2(x+4, y+2), Game1.textColor);
+            }
             return textWidth + 7;
         }
 
         public int drawUnfocusedTab(SpriteBatch b, string text, int xoff)
         {
-            int textWidth = (int)Game1.smallFont.MeasureString(text).X;
+            bool useIcon = text.Equals(TabBar.IndoorLabel);
+            int textWidth = GetTextWidth(text);
             int x = (this.parent?.xPositionOnScreen ?? 0) + this.Bounds.X + xoff;
             int y = (this.parent?.yPositionOnScreen ?? 0) + this.Bounds.Y;
 
             Color textAlpha = Game1.textColor;
             textAlpha.A /= 2;
-            Utility.drawTextWithShadow(b, text, Game1.smallFont,
-                    new Vector2(x+4, y+6), textAlpha);
+            if (useIcon) {
+                b.Draw(ShaderMenu.IconTexture, color: textAlpha,
+                        sourceRectangle: new Rectangle(110, 0, 22, 22),
+                        destinationRectangle: new Rectangle(x+10, y+10, 22, 22));
+            }
+            else {
+                Utility.drawTextWithShadow(b, text, Game1.smallFont,
+                        new Vector2(x+4, y+6), textAlpha);
+            }
 
             b.Draw(Game1.menuTexture, color: Color.White,
                     sourceRectangle: new Rectangle(64, 324, 4, 52),
@@ -96,7 +120,7 @@ namespace ichortower.ui
         {
             int start = 20;
             for (int i = 0; i < Labels.Length; ++i) {
-                int dx = (int)Game1.smallFont.MeasureString(Labels[i]).X + 7;
+                int dx = GetTextWidth(Labels[i]) + 7;
                 if (x > start && x < start + dx) {
                     this.FocusedIndex = i;
                     if (this.parent is ShaderMenu m) {
