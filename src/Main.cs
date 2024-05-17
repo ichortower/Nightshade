@@ -83,7 +83,7 @@ namespace ichortower
             if (conf.ColorizeIndoors && (!Game1.currentLocation?.IsOutdoors ?? false)) {
                 index = 4;
             }
-            ColorizerPreset active = conf.ColorizerProfiles[index];
+            ColorizerProfile active = conf.ColorizerProfiles[index];
             ColorShader.Parameters["Saturation"].SetValue(active.Saturation);
             ColorShader.Parameters["Lightness"].SetValue(active.Lightness);
             ColorShader.Parameters["Contrast"].SetValue(active.Contrast);

@@ -25,14 +25,14 @@ namespace ichortower.ui
         private Widget heldChild = null;
         private Widget keyedChild = null;
 
-        private ColorizerPreset[] ColorizerInitialStates = new ColorizerPreset[5] {
+        private ColorizerProfile[] ColorizerInitialStates = new ColorizerProfile[5] {
             new(), new(), new(), new(), new(),
         };
-        private ColorizerPreset[] ColorizerActiveStates = new ColorizerPreset[5] {
+        private ColorizerProfile[] ColorizerActiveStates = new ColorizerProfile[5] {
             new(), new(), new(), new(), new(),
         };
 
-        private ColorizerPreset CopyPasteBuffer = null;
+        private ColorizerProfile CopyPasteBuffer = null;
 
         public ShaderMenu()
             : this(defaultX, defaultY)
@@ -269,12 +269,12 @@ namespace ichortower.ui
             else {
                 seasonSwitcher.FocusedIndex = Nightshade.Config.ColorizerActiveProfile;
             }
-            LoadColorizerPreset(ColorizerInitialStates[seasonSwitcher.FocusedIndex]);
-            LoadDepthOfFieldPreset(Nightshade.Config.DepthOfFieldSettings);
+            LoadColorizerProfile(ColorizerInitialStates[seasonSwitcher.FocusedIndex]);
+            LoadDepthOfFieldProfile(Nightshade.Config.DepthOfFieldSettings);
 
         }
 
-        public void LoadColorizerPreset(ColorizerPreset set)
+        public void LoadColorizerProfile(ColorizerProfile set)
         {
             foreach (var child in this.children) {
                 if (child is Slider ch) {
@@ -320,7 +320,7 @@ namespace ichortower.ui
             }
         }
 
-        public void LoadDepthOfFieldPreset(DepthOfFieldPreset set)
+        public void LoadDepthOfFieldProfile(DepthOfFieldProfile set)
         {
             foreach (var child in this.children) {
                 if ((child is Slider ch)) {
@@ -464,9 +464,9 @@ namespace ichortower.ui
                 return;
             }
             if (child == seasonSwitcher) {
-                LoadColorizerPreset(ColorizerActiveStates[seasonSwitcher.FocusedIndex]);
+                LoadColorizerProfile(ColorizerActiveStates[seasonSwitcher.FocusedIndex]);
             }
-            ColorizerPreset current = ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+            ColorizerProfile current = ColorizerActiveStates[seasonSwitcher.FocusedIndex];
             if (child is Slider sl) {
                 switch (sl.Name) {
                 case "Saturation":
@@ -574,33 +574,33 @@ namespace ichortower.ui
 
         public void RevertCurrentProfile()
         {
-            ref ColorizerPreset current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
-            ColorizerPreset rev = ColorizerInitialStates[seasonSwitcher.FocusedIndex];
+            ref ColorizerProfile current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+            ColorizerProfile rev = ColorizerInitialStates[seasonSwitcher.FocusedIndex];
             current = rev.Clone();
-            LoadColorizerPreset(current);
+            LoadColorizerProfile(current);
             onChildChange(null);
         }
 
         public void ClearCurrentProfile()
         {
-            ref ColorizerPreset current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+            ref ColorizerProfile current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
             current = new();
-            LoadColorizerPreset(current);
+            LoadColorizerProfile(current);
             onChildChange(null);
         }
 
         public void CopyCurrentProfile()
         {
-            ColorizerPreset current = ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+            ColorizerProfile current = ColorizerActiveStates[seasonSwitcher.FocusedIndex];
             CopyPasteBuffer = current.Clone();
         }
 
         public void PasteCurrentProfile()
         {
             if (CopyPasteBuffer != null) {
-                ref ColorizerPreset current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+                ref ColorizerProfile current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
                 current = CopyPasteBuffer.Clone();
-                LoadColorizerPreset(current);
+                LoadColorizerProfile(current);
                 onChildChange(null);
             }
         }

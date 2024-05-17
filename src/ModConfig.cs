@@ -11,17 +11,17 @@ namespace ichortower
         public bool ColorizeBySeason = true;
         public bool ColorizeIndoors = true;
         public int ColorizerActiveProfile = 0;
-        public ColorizerPreset[] ColorizerProfiles = new ColorizerPreset[5] {
+        public ColorizerProfile[] ColorizerProfiles = new ColorizerProfile[5] {
             new(), new(), new(), new(), new(),
         };
 
         public bool DepthOfFieldEnabled = false;
-        public DepthOfFieldPreset DepthOfFieldSettings = new();
+        public DepthOfFieldProfile DepthOfFieldSettings = new();
 
         public static ModConfig ApplyMigrations(ModConfig conf)
         {
             if (conf.ColorizerProfiles.Length < 5) {
-                ColorizerPreset[] arr = new ColorizerPreset[5];
+                ColorizerProfile[] arr = new ColorizerProfile[5];
                 for (int i = 0; i < 5; ++i) {
                     if (i < conf.ColorizerProfiles.Length) {
                         arr[i] = conf.ColorizerProfiles[i].Clone();
@@ -36,7 +36,7 @@ namespace ichortower
         }
     }
 
-    public sealed class ColorizerPreset
+    public sealed class ColorizerProfile
     {
         public float Saturation = 0f;
         public float Lightness = 0f;
@@ -54,12 +54,12 @@ namespace ichortower
         public float HighlightG = 0f;
         public float HighlightB = 0f;
 
-        public ColorizerPreset Clone() {
-            return (ColorizerPreset) this.MemberwiseClone();
+        public ColorizerProfile Clone() {
+            return (ColorizerProfile) this.MemberwiseClone();
         }
     }
 
-    public sealed class DepthOfFieldPreset
+    public sealed class DepthOfFieldProfile
     {
         public float Field = 0.6f;
         public float Intensity = 6.0f;
