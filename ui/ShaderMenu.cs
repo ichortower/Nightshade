@@ -363,6 +363,7 @@ namespace ichortower.ui
                 built.ColorizerProfiles[i] = ColorizerActiveStates[i].Clone();
             }
             built.ColorizeBySeason = bySeasonToggle.Value;
+            built.ColorizeIndoors = byIndoorsToggle.Value;
             built.ColorizerActiveProfile = seasonSwitcher.FocusedIndex;
             Nightshade.Config = built;
             Nightshade.instance.Helper.WriteConfig(Nightshade.Config);
@@ -532,9 +533,10 @@ namespace ichortower.ui
                 built.ColorizerProfiles[i] = ColorizerActiveStates[i].Clone();
             }
             // because this is controlling the live preview, we don't care if
-            // colorize by season is on. force it off so we see the current
-            // profile.
+            // the by-season or by-indoors toggles are on. force them off so
+            // we see the current profile.
             built.ColorizeBySeason = false;
+            built.ColorizeIndoors = false;
             built.ColorizerActiveProfile = seasonSwitcher.FocusedIndex;
             Nightshade.instance.ApplyConfig(built);
         }
