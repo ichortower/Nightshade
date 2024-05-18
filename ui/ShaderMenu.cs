@@ -233,6 +233,7 @@ namespace ichortower.ui
 
         public void LoadCurrentSettings()
         {
+            /*
             foreach (var child in this.children) {
                 if (child is Checkbox ch) {
                     switch (ch.Name) {
@@ -271,7 +272,7 @@ namespace ichortower.ui
             }
             LoadColorizerProfile(ColorizerInitialStates[seasonSwitcher.FocusedIndex]);
             LoadDepthOfFieldProfile(Nightshade.Config.DepthOfFieldSettings);
-
+            */
         }
 
         public void LoadColorizerProfile(ColorizerProfile set)
@@ -338,6 +339,7 @@ namespace ichortower.ui
 
         public void SaveSettings()
         {
+            /*
             ModConfig built = new();
             built.MenuKeybind = Nightshade.Config.MenuKeybind;
             foreach (var ch in this.children) {
@@ -368,6 +370,7 @@ namespace ichortower.ui
             Nightshade.Config = built;
             Nightshade.instance.Helper.WriteConfig(Nightshade.Config);
             // toast "saved"
+            */
         }
 
         public override void draw(SpriteBatch b)
@@ -460,6 +463,7 @@ namespace ichortower.ui
 
         public void onChildChange(Widget child)
         {
+            /*
             if (child == bySeasonToggle || child == byIndoorsToggle) {
                 setSwitcherLabels();
                 return;
@@ -539,6 +543,7 @@ namespace ichortower.ui
             built.ColorizeIndoors = false;
             built.ColorizerActiveProfile = seasonSwitcher.FocusedIndex;
             Nightshade.instance.ApplyConfig(built);
+            */
         }
 
         private void setSwitcherLabels()

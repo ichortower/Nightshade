@@ -16,7 +16,8 @@ namespace ichortower
     internal sealed class Nightshade : Mod
     {
         public static string ModId = null;
-        public static Effect ColorShader = null;
+        public static Effect WorldColorizer = null;
+        public static Effect UIColorizer = null;
         public static Effect DofShader = null;
 
         private static SpriteBatch sb = null;
@@ -38,10 +39,11 @@ namespace ichortower
             try {
                 byte[] stream = File.ReadAllBytes(Path.Combine(
                         helper.DirectoryPath, "assets/colorizer.mgfx"));
-                Nightshade.ColorShader = new Effect(Game1.graphics.GraphicsDevice, stream);
+                WorldColorizer = new Effect(Game1.graphics.GraphicsDevice, stream);
+                UIColorizer = new Effect(Game1.graphics.GraphicsDevice, stream);
                 stream = File.ReadAllBytes(Path.Combine(
                         helper.DirectoryPath, "assets/depthoffield.mgfx"));
-                Nightshade.DofShader = new Effect(Game1.graphics.GraphicsDevice, stream);
+                DofShader = new Effect(Game1.graphics.GraphicsDevice, stream);
             }
             catch(Exception e) {
                 Monitor.Log("Could not load a required shader!" +
@@ -51,6 +53,9 @@ namespace ichortower
             }
             ModConfig conf = helper.ReadConfig<ModConfig>();
             Nightshade.Config = ModConfig.ApplyMigrations(conf);
+            // write config again. ReadConfig also writes it back out, but
+            // we may have applied migrations, so ensure it's cromulent
+            helper.WriteConfig(Nightshade.Config);
             ApplyConfig(Nightshade.Config);
 
             var harmony = new Harmony(this.ModManifest.UniqueID);
@@ -76,29 +81,72 @@ namespace ichortower
 
         public void ApplyConfig(ModConfig conf)
         {
-            int index = conf.ColorizerActiveProfile;
-            if (conf.ColorizeBySeason) {
-                index = Game1.currentLocation?.GetSeasonIndex() ?? Game1.seasonIndex;
+            usingColorizeWorld = false;
+            usingColorizeUI = false;
+            usingDepthOfField = false;
+            int i = 0;
+            foreach (var profile in conf.Profiles) {
+                if (string.IsNullOrEmpty(profile.Conditions) ||
+                        profile.Conditions.ToLower() == "true" ||
+                        GameStateQuery.CheckConditions(profile.Conditions)) {
+                    if (profile.ColorizeWorld) {
+                        Monitor.Log($"using profile {i} for world", LogLevel.Info);
+                        usingColorizeWorld = true;
+                        WorldColorizer.Parameters["Saturation"].SetValue(
+                                profile.ColorSettings.Saturation);
+                        WorldColorizer.Parameters["Lightness"].SetValue(
+                                profile.ColorSettings.Lightness);
+                        WorldColorizer.Parameters["Contrast"].SetValue(
+                                profile.ColorSettings.Contrast);
+                        WorldColorizer.Parameters["ShadowRgb"].SetValue(new Vector3(
+                                profile.ColorSettings.ShadowR,
+                                profile.ColorSettings.ShadowG,
+                                profile.ColorSettings.ShadowB));
+                        WorldColorizer.Parameters["MidtoneRgb"].SetValue(new Vector3(
+                                profile.ColorSettings.MidtoneR,
+                                profile.ColorSettings.MidtoneG,
+                                profile.ColorSettings.MidtoneB));
+                        WorldColorizer.Parameters["HighlightRgb"].SetValue(new Vector3(
+                                profile.ColorSettings.HighlightR,
+                                profile.ColorSettings.HighlightG,
+                                profile.ColorSettings.HighlightB));
+                    }
+                    if (profile.ColorizeUI) {
+                        usingColorizeUI = true;
+                        Monitor.Log($"using profile {i} for ui", LogLevel.Info);
+                        UIColorizer.Parameters["Saturation"].SetValue(
+                                profile.ColorSettings.Saturation);
+                        UIColorizer.Parameters["Lightness"].SetValue(
+                                profile.ColorSettings.Lightness);
+                        UIColorizer.Parameters["Contrast"].SetValue(
+                                profile.ColorSettings.Contrast);
+                        UIColorizer.Parameters["ShadowRgb"].SetValue(new Vector3(
+                                profile.ColorSettings.ShadowR,
+                                profile.ColorSettings.ShadowG,
+                                profile.ColorSettings.ShadowB));
+                        UIColorizer.Parameters["MidtoneRgb"].SetValue(new Vector3(
+                                profile.ColorSettings.MidtoneR,
+                                profile.ColorSettings.MidtoneG,
+                                profile.ColorSettings.MidtoneB));
+                        UIColorizer.Parameters["HighlightRgb"].SetValue(new Vector3(
+                                profile.ColorSettings.HighlightR,
+                                profile.ColorSettings.HighlightG,
+                                profile.ColorSettings.HighlightB));
+                    }
+                    if (profile.EnableToyShader == ToyShader.DepthOfField) {
+                        usingDepthOfField = true;
+                        Monitor.Log($"using profile {i} for dof", LogLevel.Info);
+                        DofShader.Parameters["Field"].SetValue(
+                                profile.DepthOfField.Field);
+                        DofShader.Parameters["Intensity"].SetValue(
+                                profile.DepthOfField.Intensity);
+                    }
+                    if (usingColorizeWorld && usingColorizeUI && usingDepthOfField) {
+                        break;
+                    }
+                    ++i;
+                }
             }
-            if (conf.ColorizeIndoors && (!Game1.currentLocation?.IsOutdoors ?? false)) {
-                index = 4;
-            }
-            ColorizerProfile active = conf.ColorizerProfiles[index];
-            ColorShader.Parameters["Saturation"].SetValue(active.Saturation);
-            ColorShader.Parameters["Lightness"].SetValue(active.Lightness);
-            ColorShader.Parameters["Contrast"].SetValue(active.Contrast);
-            ColorShader.Parameters["ShadowRgb"].SetValue(new Vector3(
-                    active.ShadowR, active.ShadowG, active.ShadowB));
-            ColorShader.Parameters["MidtoneRgb"].SetValue(new Vector3(
-                    active.MidtoneR, active.MidtoneG, active.MidtoneB));
-            ColorShader.Parameters["HighlightRgb"].SetValue(new Vector3(
-                    active.HighlightR, active.HighlightG, active.HighlightB));
-            DofShader.Parameters["Field"].SetValue(conf.DepthOfFieldSettings.Field);
-            DofShader.Parameters["Intensity"].SetValue(conf.DepthOfFieldSettings.Intensity);
-
-            usingColorizeWorld = conf.ColorizeWorld;
-            usingColorizeUI = conf.ColorizeUI;
-            usingDepthOfField = conf.DepthOfFieldEnabled;
         }
 
         public void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -206,7 +254,7 @@ namespace ichortower
                 sb.Begin(SpriteSortMode.Deferred,
                         BlendState.AlphaBlend,
                         SamplerState.PointClamp,
-                        effect: Nightshade.ColorShader);
+                        effect: UIColorizer);
                 sb.Draw(texture: Game1.game1.uiScreen,
                         position: Vector2.Zero,
                         color: Color.White);
@@ -240,7 +288,7 @@ namespace ichortower
                 sb.Begin(SpriteSortMode.Deferred,
                         BlendState.AlphaBlend,
                         SamplerState.PointClamp,
-                        effect: Nightshade.ColorShader);
+                        effect: WorldColorizer);
                 sb.Draw(texture: sceneScreen,
                         position: Vector2.Zero,
                         color: Color.White);
