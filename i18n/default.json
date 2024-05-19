@@ -1,13 +1,25 @@
 {
-  "menu.Colorizer.Text": "Colorize:",
+  "menu.AddProfile.Hover": "Add^Add a new profile to the end of the list.",
+  "menu.RemoveProfile.Hover": "Remove^Delete this profile.",
+  "menu.Conditions.Text": "Conditions",
+  "menu.Conditions.Hover": "Enter a Game State Query here to specify when this profile should apply. Lower-numbered profiles are checked first.",
+  "menu.QuickConditionsSpring.Hover": "Spring^Apply in Spring. Query: LOCATION_SEASON Here Spring",
+  "menu.QuickConditionsSummer.Hover": "Summer^Apply in Summer. Query: LOCATION_SEASON Here Summer",
+  "menu.QuickConditionsFall.Hover": "Fall^Apply in Fall. Query: LOCATION_SEASON Here Fall",
+  "menu.QuickConditionsWinter.Hover": "Winter^Apply in Winter. Query: LOCATION_SEASON Here Winter",
+  "menu.QuickConditionsIndoors.Hover": "Indoors^Apply when indoors. Query: LOCATION_IS_INDOORS Here",
+
+
+
+  "menu.Colorizer.Text": "Colorize",
   "menu.ColorizeWorld.Text": "World",
   "menu.ColorizeWorld.Hover": "Apply the color shader to the world layer.",
   "menu.ColorizeUI.Text": "UI",
   "menu.ColorizeUI.Hover": "Apply the color shader to the UI layer (menus, HUD).",
-  "menu.ColorizeBySeason.Text": "By Season",
-  "menu.ColorizeBySeason.Hover": "When enabled, the first four profiles will be used automatically for Spring, Summer, Fall, and Winter, respectively.",
-  "menu.ColorizeIndoors.Text": "Indoors",
-  "menu.ColorizeIndoors.Hover": "When enabled, the fifth profile will be used automatically when in an indoor location.",
+  //"menu.ColorizeBySeason.Text": "By Season",
+  //"menu.ColorizeBySeason.Hover": "When enabled, the first four profiles will be used automatically for Spring, Summer, Fall, and Winter, respectively.",
+  //"menu.ColorizeIndoors.Text": "Indoors",
+  //"menu.ColorizeIndoors.Hover": "When enabled, the fifth profile will be used automatically when in an indoor location.",
 
   "menu.Saturation.Text": "Saturation",
   "menu.Lightness.Text": "Lightness",

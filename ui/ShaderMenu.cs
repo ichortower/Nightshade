@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using StardewValley;
 using StardewValley.Menus;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ichortower.ui
 {
@@ -18,9 +19,9 @@ namespace ichortower.ui
 
         private List<Widget> children = new();
         // references to the child widgets that have interop
+        private TabBar profileSwitcher = null;
         private Checkbox bySeasonToggle = null;
         private Checkbox byIndoorsToggle = null;
-        private TabBar seasonSwitcher = null;
 
         private Widget heldChild = null;
         private Widget keyedChild = null;
@@ -59,6 +60,28 @@ namespace ichortower.ui
         {
             int y = 20;
             int x = 20;
+
+            string[] names = Nightshade.Config.Profiles.Select(
+                    (p, i) => $" {i+1} ").ToArray();
+            var tbr_profiles = new TabBar(
+                    new Rectangle(4, y, defaultWidth-8, 39),
+                    names,
+                    parent: this);
+            profileSwitcher = tbr_profiles;
+            y += tbr_profiles.Bounds.Height + 16;
+
+            var txt_conditions = new TextBox(this,
+                    new Rectangle(x, y-3, 0, 33),
+                    name: "Conditions");
+            var lbl_conditions = new Label(this,
+                    new Rectangle(x, y, 0, 27),
+                    text: TR.Get("menu.Conditions.Text"),
+                    hoverText: TR.Get("menu.Conditions.Hover"),
+                    activate: txt_conditions);
+            txt_conditions.Bounds.X += lbl_conditions.Bounds.Width + 12;
+            txt_conditions.Bounds.Width = defaultWidth - 20 - txt_conditions.Bounds.X;
+            y += txt_conditions.Bounds.Height + 8;
+
             // give labels the same height (27) as checkboxes so they line up
             // vertically (default valign is center)
             var lbl_colorizer = new Label(this,
@@ -102,12 +125,6 @@ namespace ichortower.ui
                     activate: chk_colorizeIndoors);
             y += chk_colorBySeason.Bounds.Height + 16;
 
-            var tbr_profiles = new TabBar(
-                    new Rectangle(4, y, defaultWidth-8, 39),
-                    new string[] {" 1 ", " 2 ", " 3 ", " 4 ", " 5 "},
-                    parent: this);
-            seasonSwitcher = tbr_profiles;
-            y += tbr_profiles.Bounds.Height + 16;
             // same as before, give labels the same height (20) as the sliders.
             // this makes the labels render "too high" but it lines up
             var lbl_saturation = new Label(this,
@@ -208,11 +225,10 @@ namespace ichortower.ui
             btn_save.Bounds.Y = defaultHeight - btn_save.Bounds.Height - 8;
 
             this.children.AddRange(new List<Widget>() {
+                tbr_profiles,
+                lbl_conditions, txt_conditions,
                 lbl_colorizer, lbl_colorizeWorld, chk_colorizeWorld,
                 lbl_colorizeUI, chk_colorizeUI,
-                lbl_colorBySeason, chk_colorBySeason,
-                lbl_colorizeIndoors, chk_colorizeIndoors,
-                tbr_profiles,
                 lbl_saturation, sld_saturation,
                 lbl_lightness, sld_lightness,
                 lbl_contrast, sld_contrast,
@@ -546,6 +562,7 @@ namespace ichortower.ui
             */
         }
 
+        /*
         private void setSwitcherLabels()
         {
             for (int i = 0; i < 5; ++i) {
@@ -566,6 +583,7 @@ namespace ichortower.ui
                 seasonSwitcher.Labels[i] = lbl;
             }
         }
+        */
 
         public void drawFrame(SpriteBatch b, int x, int y, int w, int h)
         {
@@ -581,8 +599,8 @@ namespace ichortower.ui
 
         public void RevertCurrentProfile()
         {
-            ref ColorizerProfile current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
-            ColorizerProfile rev = ColorizerInitialStates[seasonSwitcher.FocusedIndex];
+            ref ColorizerProfile current = ref ColorizerActiveStates[profileSwitcher.FocusedIndex];
+            ColorizerProfile rev = ColorizerInitialStates[profileSwitcher.FocusedIndex];
             current = rev.Clone();
             LoadColorizerProfile(current);
             onChildChange(null);
@@ -590,7 +608,7 @@ namespace ichortower.ui
 
         public void ClearCurrentProfile()
         {
-            ref ColorizerProfile current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+            ref ColorizerProfile current = ref ColorizerActiveStates[profileSwitcher.FocusedIndex];
             current = new();
             LoadColorizerProfile(current);
             onChildChange(null);
@@ -598,14 +616,14 @@ namespace ichortower.ui
 
         public void CopyCurrentProfile()
         {
-            ColorizerProfile current = ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+            ColorizerProfile current = ColorizerActiveStates[profileSwitcher.FocusedIndex];
             CopyPasteBuffer = current.Clone();
         }
 
         public void PasteCurrentProfile()
         {
             if (CopyPasteBuffer != null) {
-                ref ColorizerProfile current = ref ColorizerActiveStates[seasonSwitcher.FocusedIndex];
+                ref ColorizerProfile current = ref ColorizerActiveStates[profileSwitcher.FocusedIndex];
                 current = CopyPasteBuffer.Clone();
                 LoadColorizerProfile(current);
                 onChildChange(null);
