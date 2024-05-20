@@ -333,38 +333,17 @@ namespace ichortower.ui
 
         public void SaveSettings()
         {
-            /*
             ModConfig built = new();
             built.MenuKeybind = Nightshade.Config.MenuKeybind;
-            foreach (var ch in this.children) {
-                switch (ch.Name) {
-                case "ColorizeWorld":
-                    built.ColorizeWorld = (ch as Checkbox).Value;
-                    break;
-                case "ColorizeUI":
-                    built.ColorizeUI = (ch as Checkbox).Value;
-                    break;
-                case "DepthOfFieldEnabled":
-                    built.DepthOfFieldEnabled = (ch as Checkbox).Value;
-                    break;
-                case "Field":
-                    built.DepthOfFieldSettings.Field = (float)(ch as Slider).Value / 100f;
-                    break;
-                case "Intensity":
-                    built.DepthOfFieldSettings.Intensity = (float)(ch as Slider).Value / 10f;
-                    break;
-                }
+            foreach (var profile in ProfileActiveStates) {
+                built.Profiles.Add(profile.Clone());
             }
-            for (int i = 0; i < ColorizerActiveStates.Length; ++i) {
-                built.ColorizerProfiles[i] = ColorizerActiveStates[i].Clone();
-            }
-            built.ColorizeBySeason = bySeasonToggle.Value;
-            built.ColorizeIndoors = byIndoorsToggle.Value;
-            built.ColorizerActiveProfile = seasonSwitcher.FocusedIndex;
             Nightshade.Config = built;
             Nightshade.instance.Helper.WriteConfig(Nightshade.Config);
-            // toast "saved"
-            */
+            HUDMessage m = new("Nightshade: config saved.", HUDMessage.newQuest_type);
+            m.timeLeft = 2000;
+            m.type = $"{Nightshade.ModId}_SaveToast";
+            Game1.addHUDMessage(m);
         }
 
         public override void draw(SpriteBatch b)
