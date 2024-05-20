@@ -27,6 +27,7 @@ namespace ichortower
         private static bool usingColorizeWorld = false;
         private static bool usingColorizeUI = false;
         private static bool usingDepthOfField = false;
+        public static int InitialMenuIndex = 0;
 
         public static ModConfig Config;
 
@@ -51,6 +52,7 @@ namespace ichortower
                 Monitor.Log(e.ToString(), LogLevel.Error);
                 return;
             }
+
             ModConfig conf = helper.ReadConfig<ModConfig>();
             Nightshade.Config = ModConfig.ApplyMigrations(conf);
             // write config again. ReadConfig also writes it back out, but
@@ -74,6 +76,7 @@ namespace ichortower
             helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.Saved += this.OnSaved;
+            helper.Events.GameLoop.ReturnedToTitle += this.OnReturnedToTitle;
             helper.Events.Specialized.LoadStageChanged += this.OnLoadStageChanged;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
             helper.Events.Player.Warped += this.OnPlayerWarped;
@@ -84,69 +87,74 @@ namespace ichortower
             usingColorizeWorld = false;
             usingColorizeUI = false;
             usingDepthOfField = false;
-            int i = 0;
-            foreach (var profile in conf.Profiles) {
-                if (string.IsNullOrEmpty(profile.Conditions) ||
-                        profile.Conditions.ToLower() == "true" ||
-                        GameStateQuery.CheckConditions(profile.Conditions)) {
-                    if (profile.ColorizeWorld) {
-                        Monitor.Log($"using profile {i} for world", LogLevel.Info);
-                        usingColorizeWorld = true;
-                        WorldColorizer.Parameters["Saturation"].SetValue(
-                                profile.ColorSettings.Saturation);
-                        WorldColorizer.Parameters["Lightness"].SetValue(
-                                profile.ColorSettings.Lightness);
-                        WorldColorizer.Parameters["Contrast"].SetValue(
-                                profile.ColorSettings.Contrast);
-                        WorldColorizer.Parameters["ShadowRgb"].SetValue(new Vector3(
-                                profile.ColorSettings.ShadowR,
-                                profile.ColorSettings.ShadowG,
-                                profile.ColorSettings.ShadowB));
-                        WorldColorizer.Parameters["MidtoneRgb"].SetValue(new Vector3(
-                                profile.ColorSettings.MidtoneR,
-                                profile.ColorSettings.MidtoneG,
-                                profile.ColorSettings.MidtoneB));
-                        WorldColorizer.Parameters["HighlightRgb"].SetValue(new Vector3(
-                                profile.ColorSettings.HighlightR,
-                                profile.ColorSettings.HighlightG,
-                                profile.ColorSettings.HighlightB));
+            InitialMenuIndex = 0;
+            bool titleMode = (Game1.gameMode == Game1.titleScreenGameMode ||
+                        Game1.gameMode == Game1.logoScreenGameMode);
+            for (int i = 0; i < conf.Profiles.Count; ++i) {
+                var profile = conf.Profiles[i];
+                if (titleMode) {
+                    if (!profile.ColorizeTitleScreen) {
+                        continue;
                     }
-                    if (profile.ColorizeUI) {
-                        usingColorizeUI = true;
-                        Monitor.Log($"using profile {i} for ui", LogLevel.Info);
-                        UIColorizer.Parameters["Saturation"].SetValue(
-                                profile.ColorSettings.Saturation);
-                        UIColorizer.Parameters["Lightness"].SetValue(
-                                profile.ColorSettings.Lightness);
-                        UIColorizer.Parameters["Contrast"].SetValue(
-                                profile.ColorSettings.Contrast);
-                        UIColorizer.Parameters["ShadowRgb"].SetValue(new Vector3(
-                                profile.ColorSettings.ShadowR,
-                                profile.ColorSettings.ShadowG,
-                                profile.ColorSettings.ShadowB));
-                        UIColorizer.Parameters["MidtoneRgb"].SetValue(new Vector3(
-                                profile.ColorSettings.MidtoneR,
-                                profile.ColorSettings.MidtoneG,
-                                profile.ColorSettings.MidtoneB));
-                        UIColorizer.Parameters["HighlightRgb"].SetValue(new Vector3(
-                                profile.ColorSettings.HighlightR,
-                                profile.ColorSettings.HighlightG,
-                                profile.ColorSettings.HighlightB));
+                }
+                // null and empty will both return true here, which is desired
+                else if (!GameStateQuery.CheckConditions(profile.Conditions)) {
+                    continue;
+                }
+                if (!usingColorizeWorld && profile.ColorizeWorld) {
+                    Monitor.Log($"using profile {i} for world", LogLevel.Info);
+                    InitialMenuIndex = i;
+                    usingColorizeWorld = true;
+                    SetColorizerParameters(ref WorldColorizer, ref profile);
+                }
+                if (!usingColorizeUI && profile.ColorizeUI) {
+                    usingColorizeUI = true;
+                    if (!usingColorizeWorld) {
+                        InitialMenuIndex = i;
                     }
-                    if (profile.EnableToyShader == ToyShader.DepthOfField) {
-                        usingDepthOfField = true;
-                        Monitor.Log($"using profile {i} for dof", LogLevel.Info);
-                        DofShader.Parameters["Field"].SetValue(
-                                profile.DepthOfField.Field);
-                        DofShader.Parameters["Intensity"].SetValue(
-                                profile.DepthOfField.Intensity);
+                    Monitor.Log($"using profile {i} for ui", LogLevel.Info);
+                    SetColorizerParameters(ref UIColorizer, ref profile);
+                }
+                if (!usingDepthOfField && profile.EnableToyShader == ToyShader.DepthOfField) {
+                    usingDepthOfField = true;
+                    if (!usingColorizeWorld && !usingColorizeUI) {
+                        InitialMenuIndex = i;
                     }
-                    if (usingColorizeWorld && usingColorizeUI && usingDepthOfField) {
-                        break;
-                    }
-                    ++i;
+                    Monitor.Log($"using profile {i} for dof", LogLevel.Info);
+                    DofShader.Parameters["Field"].SetValue(
+                            profile.DepthOfField.Field);
+                    DofShader.Parameters["Intensity"].SetValue(
+                            profile.DepthOfField.Intensity);
+                }
+                if (titleMode && usingColorizeUI) {
+                    break;
+                }
+                if (usingColorizeWorld && usingColorizeUI && usingDepthOfField) {
+                    break;
                 }
             }
+        }
+
+        public void SetColorizerParameters(ref Effect shader, ref NightshadeProfile profile)
+        {
+            shader.Parameters["Saturation"].SetValue(
+                    profile.ColorSettings.Saturation);
+            shader.Parameters["Lightness"].SetValue(
+                    profile.ColorSettings.Lightness);
+            shader.Parameters["Contrast"].SetValue(
+                    profile.ColorSettings.Contrast);
+            shader.Parameters["ShadowRgb"].SetValue(new Vector3(
+                    profile.ColorSettings.ShadowR,
+                    profile.ColorSettings.ShadowG,
+                    profile.ColorSettings.ShadowB));
+            shader.Parameters["MidtoneRgb"].SetValue(new Vector3(
+                    profile.ColorSettings.MidtoneR,
+                    profile.ColorSettings.MidtoneG,
+                    profile.ColorSettings.MidtoneB));
+            shader.Parameters["HighlightRgb"].SetValue(new Vector3(
+                    profile.ColorSettings.HighlightR,
+                    profile.ColorSettings.HighlightG,
+                    profile.ColorSettings.HighlightB));
         }
 
         public void OnGameLaunched(object sender, GameLaunchedEventArgs e)
@@ -159,6 +167,11 @@ namespace ichortower
             if (e.NewStage == LoadStage.Preloaded) {
                 ApplyConfig(Nightshade.Config);
             }
+        }
+
+        public void OnReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
+        {
+            ApplyConfig(Nightshade.Config);
         }
 
         public void OnSaved(object sender, SavedEventArgs e)

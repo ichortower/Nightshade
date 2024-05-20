@@ -16,6 +16,7 @@ namespace ichortower.ui
             }
             set {
                 _text = value;
+                HoverText = value;
                 CursorIndex = CursorIndex; // use the setter
             }
         }
@@ -41,6 +42,10 @@ namespace ichortower.ui
                     (this.parent?.xPositionOnScreen ?? 0) + this.Bounds.X,
                     (this.parent?.yPositionOnScreen ?? 0) + this.Bounds.Y,
                     this.Bounds.Width, this.Bounds.Height);
+            if (!InHoverState) {
+                b.Draw(Game1.staminaRect, color: Color.Black * 0.08f,
+                        destinationRectangle: screenb);
+            }
             Rectangle[] sources = Widget.nineslice(
                     new Rectangle(227, 425, 9, 9), 2, 2);
             Rectangle[] targets = Widget.nineslice(screenb, 4, 4);

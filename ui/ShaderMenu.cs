@@ -20,19 +20,14 @@ namespace ichortower.ui
         private List<Widget> children = new();
         // references to the child widgets that have interop
         private TabBar profileSwitcher = null;
-        private Checkbox bySeasonToggle = null;
-        private Checkbox byIndoorsToggle = null;
+        //private Checkbox bySeasonToggle = null;
+        //private Checkbox byIndoorsToggle = null;
 
         private Widget heldChild = null;
         private Widget keyedChild = null;
 
-        private ColorizerProfile[] ColorizerInitialStates = new ColorizerProfile[5] {
-            new(), new(), new(), new(), new(),
-        };
-        private ColorizerProfile[] ColorizerActiveStates = new ColorizerProfile[5] {
-            new(), new(), new(), new(), new(),
-        };
-
+        private List<NightshadeProfile> ProfileInitialStates = new();
+        private List<NightshadeProfile> ProfileActiveStates = new();
         private ColorizerProfile CopyPasteBuffer = null;
 
         public ShaderMenu()
@@ -45,7 +40,7 @@ namespace ichortower.ui
         {
             LoadIcons();
             AddChildWidgets();
-            LoadCurrentSettings();
+            LoadConfigSettings();
             exitFunction = delegate {
                 Nightshade.instance.ApplyConfig(Nightshade.Config);
             };
@@ -68,7 +63,7 @@ namespace ichortower.ui
                     names,
                     parent: this);
             profileSwitcher = tbr_profiles;
-            y += tbr_profiles.Bounds.Height + 16;
+            y += tbr_profiles.Bounds.Height + 12;
 
             var txt_conditions = new TextBox(this,
                     new Rectangle(x, y-3, 0, 33),
@@ -78,7 +73,7 @@ namespace ichortower.ui
                     text: TR.Get("menu.Conditions.Text"),
                     hoverText: TR.Get("menu.Conditions.Hover"),
                     activate: txt_conditions);
-            txt_conditions.Bounds.X += lbl_conditions.Bounds.Width + 12;
+            txt_conditions.Bounds.X += lbl_conditions.Bounds.Width + 8;
             txt_conditions.Bounds.Width = defaultWidth - 20 - txt_conditions.Bounds.X;
             y += txt_conditions.Bounds.Height + 8;
 
@@ -86,8 +81,8 @@ namespace ichortower.ui
             // vertically (default valign is center)
             var lbl_colorizer = new Label(this,
                     new Rectangle(x, y, 0, 27),
-                    text: TR.Get("menu.Colorizer.Text"));
-            x += lbl_colorizer.Bounds.Width + 16;
+                    text: TR.Get("menu.ApplyTo.Text"));
+            x += lbl_colorizer.Bounds.Width + 8;
             var chk_colorizeWorld = new Checkbox(this, x, y, "ColorizeWorld");
             x += chk_colorizeWorld.Bounds.Width + 8;
             var lbl_colorizeWorld = new Label(this,
@@ -95,7 +90,7 @@ namespace ichortower.ui
                     text: TR.Get("menu.ColorizeWorld.Text"),
                     hoverText: TR.Get("menu.ColorizeWorld.Hover"),
                     activate: chk_colorizeWorld);
-            x += lbl_colorizeWorld.Bounds.Width + 16;
+            x += lbl_colorizeWorld.Bounds.Width + 8;
             var chk_colorizeUI = new Checkbox(this, x, y, "ColorizeUI");
             x += chk_colorizeUI.Bounds.Width + 8;
             var lbl_colorizeUI = new Label(this,
@@ -103,27 +98,15 @@ namespace ichortower.ui
                     text: TR.Get("menu.ColorizeUI.Text"),
                     hoverText: TR.Get("menu.ColorizeUI.Hover"),
                     activate: chk_colorizeUI);
-            y += lbl_colorizer.Bounds.Height + 8;
-
-            x = 20 + 40 + 16;
-            var chk_colorBySeason = new Checkbox(this, x, y, "ColorizeBySeason");
-            bySeasonToggle = chk_colorBySeason;
-            x += chk_colorBySeason.Bounds.Width + 8;
-            var lbl_colorBySeason = new Label(this,
+            x += lbl_colorizeUI.Bounds.Width + 8;
+            var chk_colorizeTitle = new Checkbox(this, x, y, "ColorizeTitleScreen");
+            x += chk_colorizeTitle.Bounds.Width + 8;
+            var lbl_colorizeTitle = new Label(this,
                     new Rectangle(x, y, 0, 27),
-                    text: TR.Get("menu.ColorizeBySeason.Text"),
-                    hoverText: TR.Get("menu.ColorizeBySeason.Hover"),
-                    activate: chk_colorBySeason);
-            x += lbl_colorBySeason.Bounds.Width + 16;
-            var chk_colorizeIndoors = new Checkbox(this, x, y, "ColorizeIndoors");
-            byIndoorsToggle = chk_colorizeIndoors;
-            x += chk_colorizeIndoors.Bounds.Width + 8;
-            var lbl_colorizeIndoors = new Label(this,
-                    new Rectangle(x, y, 0, 27),
-                    text: TR.Get("menu.ColorizeIndoors.Text"),
-                    hoverText: TR.Get("menu.ColorizeIndoors.Hover"),
-                    activate: chk_colorizeIndoors);
-            y += chk_colorBySeason.Bounds.Height + 16;
+                    text: TR.Get("menu.ColorizeTitleScreen.Text"),
+                    hoverText: TR.Get("menu.ColorizeTitleScreen.Hover"),
+                    activate: chk_colorizeTitle);
+            y += lbl_colorizer.Bounds.Height + 12;
 
             // same as before, give labels the same height (20) as the sliders.
             // this makes the labels render "too high" but it lines up
@@ -172,12 +155,8 @@ namespace ichortower.ui
             var sld_blueMidtone = new Slider(this, 48, y+20, name: "MidtoneB");
             var sld_blueHighlight = new Slider(this, 48, y+40, name: "HighlightB");
             y += 60 + 16;
-            var tbr_separator = new TabBar(
-                    new Rectangle(4, y, defaultWidth-8, 2),
-                    new string[] {}, parent: this);
-            y += 2 + 16;
 
-            // magic centering for when the future fifth button is added
+            // centering based on knowing how tall the buttons are
             buttonY += 7;
             var btn_revert = new IconButton(this, defaultWidth-50, buttonY,
                     iconIndex: 0, hoverText: TR.Get("menu.RevertButton.Hover"),
@@ -195,11 +174,15 @@ namespace ichortower.ui
                     iconIndex: 3, hoverText: TR.Get("menu.PasteButton.Hover"),
                     onClick: PasteCurrentProfile);
             buttonY += IconButton.defaultHeight + 8;
+            var btn_preview = new IconButton(this, defaultWidth-50, buttonY,
+                    iconIndex: 4, hoverText: TR.Get("menu.PreviewButton.Hover"));
+            btn_preview.ActiveIconIndex = 5;
 
-            var chk_enableDepthOfField = new Checkbox(this, 20, y, "DepthOfFieldEnabled");
+            var chk_enableDepthOfField = new Checkbox(this, 20, y, "DepthOfField");
             var lbl_enableDepthOfField = new Label(this,
                     new Rectangle(56, y, 0, 27),
                     text: TR.Get("menu.EnableDepthOfField.Text"),
+                    hoverText: TR.Get("menu.EnableDepthOfField.Hover"),
                     activate: chk_enableDepthOfField);
             y += chk_enableDepthOfField.Bounds.Height + 16;
             var lbl_field = new Label(this,
@@ -229,6 +212,7 @@ namespace ichortower.ui
                 lbl_conditions, txt_conditions,
                 lbl_colorizer, lbl_colorizeWorld, chk_colorizeWorld,
                 lbl_colorizeUI, chk_colorizeUI,
+                lbl_colorizeTitle, chk_colorizeTitle,
                 lbl_saturation, sld_saturation,
                 lbl_lightness, sld_lightness,
                 lbl_contrast, sld_contrast,
@@ -238,8 +222,7 @@ namespace ichortower.ui
                 sld_greenShadow, sld_greenMidtone, sld_greenHighlight,
                 lbl_yellow, lbl_blue,
                 sld_blueShadow, sld_blueMidtone, sld_blueHighlight,
-                btn_revert, btn_clear, btn_copy, btn_paste,
-                tbr_separator,
+                btn_revert, btn_clear, btn_copy, btn_paste, btn_preview,
                 lbl_enableDepthOfField, chk_enableDepthOfField,
                 lbl_field, sld_field,
                 lbl_intensity, sld_intensity,
@@ -247,48 +230,43 @@ namespace ichortower.ui
             });
         }
 
-        public void LoadCurrentSettings()
+        public void LoadConfigSettings()
         {
-            /*
+            ProfileInitialStates.Clear();
+            ProfileActiveStates.Clear();
+            foreach (var p in Nightshade.Config.Profiles) {
+                ProfileInitialStates.Add(p.Clone());
+                ProfileActiveStates.Add(p.Clone());
+            }
+            profileSwitcher.FocusedIndex = Nightshade.InitialMenuIndex;
+            var profile = ProfileInitialStates[Nightshade.InitialMenuIndex];
+            LoadColorizerProfile(profile.ColorSettings);
+            LoadDepthOfFieldProfile(profile.DepthOfField);
             foreach (var child in this.children) {
                 if (child is Checkbox ch) {
                     switch (ch.Name) {
                     case "ColorizeWorld":
-                        ch.Value = Nightshade.Config.ColorizeWorld;
+                        ch.Value = profile.ColorizeWorld;
                         break;
                     case "ColorizeUI":
-                        ch.Value = Nightshade.Config.ColorizeUI;
+                        ch.Value = profile.ColorizeUI;
                         break;
-                    case "ColorizeIndoors":
-                        ch.Value = Nightshade.Config.ColorizeIndoors;
+                    case "ColorizeTitleScreen":
+                        ch.Value = profile.ColorizeTitleScreen;
                         break;
-                    case "ColorizeBySeason":
-                        ch.Value = Nightshade.Config.ColorizeBySeason;
+                    case "DepthOfField":
+                        ch.Value = (profile.EnableToyShader == ToyShader.DepthOfField);
                         break;
-                    case "DepthOfFieldEnabled":
-                        ch.Value = Nightshade.Config.DepthOfFieldEnabled;
+                    }
+                }
+                if (child is TextBox tb) {
+                    switch (tb.Name) {
+                    case "Conditions":
+                        tb.Text = profile.Conditions;
                         break;
-
                     }
                 }
             }
-            for (int i = 0; i < ColorizerInitialStates.Length; ++i) {
-                ColorizerInitialStates[i] = Nightshade.Config.ColorizerProfiles[i].Clone();
-                ColorizerActiveStates[i] = ColorizerInitialStates[i].Clone();
-            }
-            setSwitcherLabels();
-            if (byIndoorsToggle.Value) {
-                seasonSwitcher.FocusedIndex = 4;
-            }
-            else if (bySeasonToggle.Value) {
-                seasonSwitcher.FocusedIndex = Game1.seasonIndex;
-            }
-            else {
-                seasonSwitcher.FocusedIndex = Nightshade.Config.ColorizerActiveProfile;
-            }
-            LoadColorizerProfile(ColorizerInitialStates[seasonSwitcher.FocusedIndex]);
-            LoadDepthOfFieldProfile(Nightshade.Config.DepthOfFieldSettings);
-            */
         }
 
         public void LoadColorizerProfile(ColorizerProfile set)
@@ -599,35 +577,43 @@ namespace ichortower.ui
 
         public void RevertCurrentProfile()
         {
+            /*
             ref ColorizerProfile current = ref ColorizerActiveStates[profileSwitcher.FocusedIndex];
             ColorizerProfile rev = ColorizerInitialStates[profileSwitcher.FocusedIndex];
             current = rev.Clone();
             LoadColorizerProfile(current);
             onChildChange(null);
+            */
         }
 
         public void ClearCurrentProfile()
         {
+            /*
             ref ColorizerProfile current = ref ColorizerActiveStates[profileSwitcher.FocusedIndex];
             current = new();
             LoadColorizerProfile(current);
             onChildChange(null);
+            */
         }
 
         public void CopyCurrentProfile()
         {
+            /*
             ColorizerProfile current = ColorizerActiveStates[profileSwitcher.FocusedIndex];
             CopyPasteBuffer = current.Clone();
+            */
         }
 
         public void PasteCurrentProfile()
         {
+            /*
             if (CopyPasteBuffer != null) {
                 ref ColorizerProfile current = ref ColorizerActiveStates[profileSwitcher.FocusedIndex];
                 current = CopyPasteBuffer.Clone();
                 LoadColorizerProfile(current);
                 onChildChange(null);
             }
+            */
         }
 
     }

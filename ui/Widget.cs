@@ -46,6 +46,10 @@ namespace ichortower.ui
         {
         }
 
+        public virtual void clickRelease(int x, int y, bool playSound = true)
+        {
+        }
+
         public virtual void keyPress(Keys key)
         {
         }

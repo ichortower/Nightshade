@@ -63,6 +63,7 @@ namespace ichortower.ui
 
         public string Sound = "drumkit6";
         public int IconIndex = 0;
+        public int ActiveIconIndex = 0;
         public Action ClickDelegate = null;
 
         public IconButton(IClickableMenu parent, int x, int y,
@@ -70,13 +71,14 @@ namespace ichortower.ui
             : this(parent, new Rectangle(x, y, defaultWidth, defaultHeight),
                     iconIndex, hoverText, onClick)
         {
+            ActiveIconIndex = IconIndex;
         }
 
         public IconButton(IClickableMenu parent, Rectangle bounds,
                 int iconIndex, string hoverText = null, Action onClick = null)
             : base(parent, bounds)
         {
-            IconIndex = iconIndex;
+            IconIndex = ActiveIconIndex = iconIndex;
             HoverText = hoverText;
             ClickDelegate = onClick;
             IconTexture = ShaderMenu.IconTexture;
@@ -98,8 +100,9 @@ namespace ichortower.ui
                     this.Bounds.Width, this.Bounds.Height);
             ButtonShared.drawFrame(this, b, screenb);
             int offset = (screenb.Width - iconXY) / 2;
+            int idx = (InActiveState ? ActiveIconIndex : IconIndex);
             b.Draw(IconTexture, color: Game1.textColor,
-                    sourceRectangle: new Rectangle(IconIndex*iconXY, 0, iconXY, iconXY),
+                    sourceRectangle: new Rectangle(idx*iconXY, 0, iconXY, iconXY),
                     destinationRectangle: new Rectangle(screenb.X+offset, screenb.Y+offset, iconXY, iconXY));
         }
 

@@ -43,6 +43,13 @@ namespace ichortower
                     }
                     conf.Profiles.Add(np);
                 }
+                if (conf.ColorizeBySeason && conf.Profiles.Count >= 4) {
+                    for (int i = 0; i < 4; ++i) {
+                        conf.Profiles[i].Conditions = "LOCATION_SEASON Target " +
+                                $"{((StardewValley.Season)i).ToString()}";
+                    }
+                    conf.Profiles[0].ColorizeTitleScreen = true;
+                }
             }
             conf.Format = CurrentFormat;
             return conf;
@@ -53,11 +60,18 @@ namespace ichortower
     {
         public string Name = "";
         public string Conditions = "";
+        public bool ColorizeTitleScreen = false;
         public bool ColorizeWorld = true;
         public bool ColorizeUI = true;
         public ColorizerProfile ColorSettings = new();
         public ToyShader EnableToyShader = ToyShader.None;
         public DepthOfFieldProfile DepthOfField = new();
+
+        public NightshadeProfile Clone() {
+            NightshadeProfile other = (NightshadeProfile) this.MemberwiseClone();
+            other.ColorSettings = ColorSettings.Clone();
+            return other;
+        }
     }
 
     public sealed class ColorizerProfile

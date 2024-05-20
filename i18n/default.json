@@ -2,7 +2,7 @@
   "menu.AddProfile.Hover": "Add^Add a new profile to the end of the list.",
   "menu.RemoveProfile.Hover": "Remove^Delete this profile.",
   "menu.Conditions.Text": "Conditions",
-  "menu.Conditions.Hover": "Enter a Game State Query here to specify when this profile should apply. Lower-numbered profiles are checked first.",
+  "menu.Conditions.Hover": "Enter a Game State Query here to specify when this profile should apply (empty always applies). Lower-numbered profiles are checked first.",
   "menu.QuickConditionsSpring.Hover": "Spring^Apply in Spring. Query: LOCATION_SEASON Here Spring",
   "menu.QuickConditionsSummer.Hover": "Summer^Apply in Summer. Query: LOCATION_SEASON Here Summer",
   "menu.QuickConditionsFall.Hover": "Fall^Apply in Fall. Query: LOCATION_SEASON Here Fall",
@@ -11,15 +11,13 @@
 
 
 
-  "menu.Colorizer.Text": "Colorize",
+  "menu.ApplyTo.Text": "Apply to",
   "menu.ColorizeWorld.Text": "World",
-  "menu.ColorizeWorld.Hover": "Apply the color shader to the world layer.",
+  "menu.ColorizeWorld.Hover": "Apply this color profile to the world layer.",
   "menu.ColorizeUI.Text": "UI",
-  "menu.ColorizeUI.Hover": "Apply the color shader to the UI layer (menus, HUD).",
-  //"menu.ColorizeBySeason.Text": "By Season",
-  //"menu.ColorizeBySeason.Hover": "When enabled, the first four profiles will be used automatically for Spring, Summer, Fall, and Winter, respectively.",
-  //"menu.ColorizeIndoors.Text": "Indoors",
-  //"menu.ColorizeIndoors.Hover": "When enabled, the fifth profile will be used automatically when in an indoor location.",
+  "menu.ColorizeUI.Hover": "Apply this color profile to the UI layer (menus, HUD).",
+  "menu.ColorizeTitleScreen.Text": "Title",
+  "menu.ColorizeTitleScreen.Hover": "Apply this color profile to the title screen.",
 
   "menu.Saturation.Text": "Saturation",
   "menu.Lightness.Text": "Lightness",
@@ -29,9 +27,10 @@
   "menu.ClearButton.Hover": "Clear^Reset all color sliders to zero.",
   "menu.CopyButton.Hover": "Copy^Copy the state of the color sliders.",
   "menu.PasteButton.Hover": "Paste^Paste the state of the color sliders.",
-  "menu.PreviewToggle.Hover": "Preview^When active, applies the current state of the color sliders (toggle this to swap between your starting state and current settings).",
+  "menu.PreviewButton.Hover": "Preview^Hold this button down to show the starting state of this profile instead of the current state. Reverts to current state when released.",
 
   "menu.EnableDepthOfField.Text": "Depth of Field",
+  "menu.EnableDepthOfField.Hover": "Blur the top and bottom of the screen to simulate parts of the image being out of focus.",
   "menu.Field.Text": "Field",
   "menu.Field.Hover": "How deep the field is: i.e. how much of the screen is fully in focus (no blur).",
   "menu.Intensity.Text": "Intensity",
