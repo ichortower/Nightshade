@@ -123,9 +123,15 @@ namespace ichortower.ui
     {
         public static void drawFrame(Widget w, SpriteBatch b, Rectangle bounds)
         {
-            int boxX = w.InHoverState && !w.InActiveState ? 267 : 256;
-            Rectangle[] sources = Widget.nineslice(new Rectangle(boxX, 256, 10, 10), 2, 2);
+            bool useHoverFrame = (w.InHoverState && !w.InActiveState);
             Rectangle[] dests = Widget.nineslice(bounds, 4, 4);
+            drawFrame(useHoverFrame, b, dests);
+        }
+
+        public static void drawFrame(bool offset, SpriteBatch b, Rectangle[] dests)
+        {
+            int boxX = offset ? 267 : 256;
+            Rectangle[] sources = Widget.nineslice(new Rectangle(boxX, 256, 10, 10), 2, 2);
             for (int i = 0; i < sources.Length; ++i) {
                 b.Draw(Game1.mouseCursors, color: Color.White,
                         sourceRectangle: sources[i],

@@ -39,7 +39,9 @@
 
   "gmcm.MenuKeybind.name": "MenuKeybind",
   "gmcm.MenuKeybind.tooltip": "The keybinding to open the Nightshade menu.",
-  "gmcm.Explainer.text": "Nightshade has its own config menu, which provides live preview of the slider settings. Please use that menu after configuring an appropriate keybinding.",
+  "gmcm.OpenMenu.name": "Nightshade Menu",
+  "gmcm.OpenMenu.tooltip": "Nightshade's own menu provides live preview of profile and slider settings.",
+  "gmcm.OpenMenu.buttonText": "Open",
 
   "EOF": ""
 }

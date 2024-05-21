@@ -543,29 +543,6 @@ namespace ichortower.ui
             Nightshade.instance.ApplyConfig(built);
         }
 
-        /*
-        private void setSwitcherLabels()
-        {
-            for (int i = 0; i < 5; ++i) {
-                string lbl = $" {i+1} ";
-                if (i == 4 ) {
-                    lbl = (byIndoorsToggle.Value ? TabBar.IndoorLabel : " 5 ");
-                }
-                else if (bySeasonToggle.Value) {
-                    string key = i switch {
-                        1 => "summer",
-                        2 => "fall",
-                        3 => "winter",
-                        _ => "spring"
-                    };
-                    lbl = Utility.capitalizeFirstLetter(Game1.content.LoadString(
-                            $"Strings\\StringsFromCSFiles:{key}"));
-                }
-                seasonSwitcher.Labels[i] = lbl;
-            }
-        }
-        */
-
         public void drawFrame(SpriteBatch b, int x, int y, int w, int h)
         {
             Texture2D tex = Game1.menuTexture;
