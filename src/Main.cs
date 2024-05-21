@@ -102,7 +102,6 @@ namespace ichortower
                     continue;
                 }
                 if (!usingColorizeWorld && profile.ColorizeWorld) {
-                    Monitor.Log($"using profile {i} for world", LogLevel.Info);
                     InitialMenuIndex = i;
                     usingColorizeWorld = true;
                     SetColorizerParameters(ref WorldColorizer, ref profile);
@@ -112,7 +111,6 @@ namespace ichortower
                     if (!usingColorizeWorld) {
                         InitialMenuIndex = i;
                     }
-                    Monitor.Log($"using profile {i} for ui", LogLevel.Info);
                     SetColorizerParameters(ref UIColorizer, ref profile);
                 }
                 if (!usingDepthOfField && profile.EnableToyShader == ToyShader.DepthOfField) {
@@ -120,7 +118,6 @@ namespace ichortower
                     if (!usingColorizeWorld && !usingColorizeUI) {
                         InitialMenuIndex = i;
                     }
-                    Monitor.Log($"using profile {i} for dof", LogLevel.Info);
                     DofShader.Parameters["Field"].SetValue(
                             profile.DepthOfField.Field);
                     DofShader.Parameters["Intensity"].SetValue(

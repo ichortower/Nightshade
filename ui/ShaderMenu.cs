@@ -20,6 +20,7 @@ namespace ichortower.ui
         private List<Widget> children = new();
         // references to the child widgets that have interop
         private TabBar profileSwitcher = null;
+        private IconButton previewButton = null;
         //private Checkbox bySeasonToggle = null;
         //private Checkbox byIndoorsToggle = null;
 
@@ -75,7 +76,7 @@ namespace ichortower.ui
                     activate: txt_conditions);
             txt_conditions.Bounds.X += lbl_conditions.Bounds.Width + 8;
             txt_conditions.Bounds.Width = defaultWidth - 20 - txt_conditions.Bounds.X;
-            y += txt_conditions.Bounds.Height + 8;
+            y += txt_conditions.Bounds.Height + 4;
 
             // give labels the same height (27) as checkboxes so they line up
             // vertically (default valign is center)
@@ -106,7 +107,7 @@ namespace ichortower.ui
                     text: TR.Get("menu.ColorizeTitleScreen.Text"),
                     hoverText: TR.Get("menu.ColorizeTitleScreen.Hover"),
                     activate: chk_colorizeTitle);
-            y += lbl_colorizer.Bounds.Height + 12;
+            y += lbl_colorizer.Bounds.Height + 16;
 
             // same as before, give labels the same height (20) as the sliders.
             // this makes the labels render "too high" but it lines up
@@ -176,7 +177,10 @@ namespace ichortower.ui
             buttonY += IconButton.defaultHeight + 8;
             var btn_preview = new IconButton(this, defaultWidth-50, buttonY,
                     iconIndex: 4, hoverText: TR.Get("menu.PreviewButton.Hover"));
+            btn_preview.Name = "PreviewButton";
             btn_preview.ActiveIconIndex = 5;
+            btn_preview.ReportUpdates = true;
+            previewButton = btn_preview;
 
             var chk_enableDepthOfField = new Checkbox(this, 20, y, "DepthOfField");
             var lbl_enableDepthOfField = new Label(this,
@@ -240,8 +244,13 @@ namespace ichortower.ui
             }
             profileSwitcher.FocusedIndex = Nightshade.InitialMenuIndex;
             var profile = ProfileInitialStates[Nightshade.InitialMenuIndex];
+            LoadToggles(profile);
             LoadColorizerProfile(profile.ColorSettings);
             LoadDepthOfFieldProfile(profile.DepthOfField);
+        }
+
+        public void LoadToggles(NightshadeProfile profile)
+        {
             foreach (var child in this.children) {
                 if (child is Checkbox ch) {
                     switch (ch.Name) {
@@ -387,7 +396,7 @@ namespace ichortower.ui
                 if (child.Bounds.Contains(modx, mody)) {
                     child.InActiveState = true;
                     child.click(modx, mody, playSound);
-                    if (child is Slider) {
+                    if (child is Slider || child.Name == "PreviewButton") {
                         this.heldChild = child;
                     }
                     this.keyedChild = child;
@@ -408,10 +417,16 @@ namespace ichortower.ui
 
         public override void releaseLeftClick(int x, int y)
         {
-            this.heldChild = null;
+            base.releaseLeftClick(x, y);
             foreach (var child in this.children) {
                 child.InActiveState = false;
             }
+            if (this.heldChild != null) {
+                int modx = x - this.xPositionOnScreen;
+                int mody = y - this.yPositionOnScreen;
+                this.heldChild.clickRelease(modx, mody);
+            }
+            this.heldChild = null;
         }
 
         public override void receiveKeyPress(Keys key)
@@ -436,87 +451,96 @@ namespace ichortower.ui
 
         public void onChildChange(Widget child)
         {
-            /*
-            if (child == bySeasonToggle || child == byIndoorsToggle) {
-                setSwitcherLabels();
-                return;
+            NightshadeProfile current = ProfileActiveStates[profileSwitcher.FocusedIndex];
+            if (child == profileSwitcher) {
+                LoadToggles(current);
+                LoadColorizerProfile(current.ColorSettings);
+                LoadDepthOfFieldProfile(current.DepthOfField);
             }
-            if (child == seasonSwitcher) {
-                LoadColorizerProfile(ColorizerActiveStates[seasonSwitcher.FocusedIndex]);
-            }
-            ColorizerProfile current = ColorizerActiveStates[seasonSwitcher.FocusedIndex];
-            if (child is Slider sl) {
+            // change the current profile along with the widget
+            else if (child is Slider sl) {
                 switch (sl.Name) {
                 case "Saturation":
-                    current.Saturation = sl.Value / 100f;
+                    current.ColorSettings.Saturation = sl.Value / 100f;
                     break;
                 case "Lightness":
-                    current.Lightness = sl.Value / 100f;
+                    current.ColorSettings.Lightness = sl.Value / 100f;
                     break;
                 case "Contrast":
-                    current.Contrast = sl.Value / 100f;
+                    current.ColorSettings.Contrast = sl.Value / 100f;
                     break;
                 case "ShadowR":
-                    current.ShadowR = sl.Value / 100f;
+                    current.ColorSettings.ShadowR = sl.Value / 100f;
                     break;
                 case "ShadowG":
-                    current.ShadowG = sl.Value / 100f;
+                    current.ColorSettings.ShadowG = sl.Value / 100f;
                     break;
                 case "ShadowB":
-                    current.ShadowB = sl.Value / 100f;
+                    current.ColorSettings.ShadowB = sl.Value / 100f;
                     break;
                 case "MidtoneR":
-                    current.MidtoneR = sl.Value / 100f;
+                    current.ColorSettings.MidtoneR = sl.Value / 100f;
                     break;
                 case "MidtoneG":
-                    current.MidtoneG = sl.Value / 100f;
+                    current.ColorSettings.MidtoneG = sl.Value / 100f;
                     break;
                 case "MidtoneB":
-                    current.MidtoneB = sl.Value / 100f;
+                    current.ColorSettings.MidtoneB = sl.Value / 100f;
                     break;
                 case "HighlightR":
-                    current.HighlightR = sl.Value / 100f;
+                    current.ColorSettings.HighlightR = sl.Value / 100f;
                     break;
                 case "HighlightG":
-                    current.HighlightG = sl.Value / 100f;
+                    current.ColorSettings.HighlightG = sl.Value / 100f;
                     break;
                 case "HighlightB":
-                    current.HighlightB = sl.Value / 100f;
-                    break;
-                }
-            }
-            ModConfig built = new();
-            foreach (var ch in this.children) {
-                switch (ch.Name) {
-                case "ColorizeWorld":
-                    built.ColorizeWorld = (ch as Checkbox).Value;
-                    break;
-                case "ColorizeUI":
-                    built.ColorizeUI = (ch as Checkbox).Value;
-                    break;
-                case "DepthOfFieldEnabled":
-                    built.DepthOfFieldEnabled = (ch as Checkbox).Value;
+                    current.ColorSettings.HighlightB = sl.Value / 100f;
                     break;
                 case "Field":
-                    built.DepthOfFieldSettings.Field = (float)(ch as Slider).Value / 100f;
+                    current.DepthOfField.Field = sl.Value / 100f;
                     break;
                 case "Intensity":
-                    built.DepthOfFieldSettings.Intensity = (float)(ch as Slider).Value / 10f;
+                    current.DepthOfField.Intensity = sl.Value / 10f;
                     break;
                 }
             }
-            // TODO use initial state if missing toggle is off
-            for (int i = 0; i < ColorizerActiveStates.Length; ++i) {
-                built.ColorizerProfiles[i] = ColorizerActiveStates[i].Clone();
+            else if (child is Checkbox ch) {
+                switch (ch.Name) {
+                case "ColorizeWorld":
+                    current.ColorizeWorld = ch.Value;
+                    break;
+                case "ColorizeUI":
+                    current.ColorizeUI = ch.Value;
+                    break;
+                case "ColorizeTitleScreen":
+                    current.ColorizeTitleScreen = ch.Value;
+                    break;
+                case "DepthOfField":
+                    current.EnableToyShader = (ch.Value ?
+                            ToyShader.DepthOfField : ToyShader.None);
+                    break;
+                }
             }
-            // because this is controlling the live preview, we don't care if
-            // the by-season or by-indoors toggles are on. force them off so
-            // we see the current profile.
-            built.ColorizeBySeason = false;
-            built.ColorizeIndoors = false;
-            built.ColorizerActiveProfile = seasonSwitcher.FocusedIndex;
+            else if (child is TextBox tx) {
+                // FIXME check for validity here dear god
+                current.Conditions = tx.Text;
+            }
+
+            // Build a minimal config to apply in Main, by just sending the
+            // current profile (TODO: and optional locked profile?) and
+            // nulling out its Conditions so it always applies.
+            // Start with current, then swap in color data from initial if
+            // preview is on
+            ModConfig built = new();
+            var p = current.Clone();
+            if (previewButton.InActiveState) {
+                p.ColorSettings = ProfileInitialStates[profileSwitcher.FocusedIndex]
+                        .ColorSettings.Clone();
+                p.DepthOfField = ProfileInitialStates[profileSwitcher.FocusedIndex].DepthOfField;
+            }
+            p.Conditions = null;
+            built.Profiles.Add(p);
             Nightshade.instance.ApplyConfig(built);
-            */
         }
 
         /*

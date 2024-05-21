@@ -64,6 +64,7 @@ namespace ichortower.ui
         public string Sound = "drumkit6";
         public int IconIndex = 0;
         public int ActiveIconIndex = 0;
+        public bool ReportUpdates = false;
         public Action ClickDelegate = null;
 
         public IconButton(IClickableMenu parent, int x, int y,
@@ -90,6 +91,16 @@ namespace ichortower.ui
                 Game1.playSound(Sound);
             }
             ClickDelegate?.Invoke();
+            if (ReportUpdates && this.parent is ShaderMenu m) {
+                m.onChildChange(this);
+            }
+        }
+
+        public override void clickRelease(int x, int y, bool playSound = true)
+        {
+            if (ReportUpdates && this.parent is ShaderMenu m) {
+                m.onChildChange(this);
+            }
         }
 
         public override void draw(SpriteBatch b)
