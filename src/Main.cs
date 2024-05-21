@@ -60,14 +60,7 @@ namespace ichortower
             helper.WriteConfig(Nightshade.Config);
             ApplyConfig(Nightshade.Config);
 
-            var harmony = new Harmony(this.ModManifest.UniqueID);
-            MethodInfo Game1_ShouldDrawOnBuffer = typeof(Game1).GetMethod(
-                    "ShouldDrawOnBuffer",
-                    BindingFlags.Public | BindingFlags.Instance);
-            var post = new HarmonyMethod(typeof(Nightshade),
-                    "Game1_ShouldDrawOnBuffer_Postfix");
-            harmony.Patch(Game1_ShouldDrawOnBuffer,
-                    postfix: post);
+            Patches.Apply();
 
             sb = new SpriteBatch(Game1.graphics.GraphicsDevice);
             helper.Events.Content.AssetRequested += this.OnAssetRequested;
@@ -76,7 +69,6 @@ namespace ichortower
             helper.Events.Display.RenderedWorld += this.OnRenderedWorld;
             helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
             helper.Events.GameLoop.Saved += this.OnSaved;
-            helper.Events.GameLoop.ReturnedToTitle += this.OnReturnedToTitle;
             helper.Events.Specialized.LoadStageChanged += this.OnLoadStageChanged;
             helper.Events.Input.ButtonsChanged += this.OnButtonsChanged;
             helper.Events.Player.Warped += this.OnPlayerWarped;
@@ -161,14 +153,11 @@ namespace ichortower
 
         public void OnLoadStageChanged(object sender, LoadStageChangedEventArgs e)
         {
-            if (e.NewStage == LoadStage.Preloaded) {
-                ApplyConfig(Nightshade.Config);
+            switch (e.NewStage) {
+                case LoadStage.Preloaded:
+                    ApplyConfig(Nightshade.Config);
+                    break;
             }
-        }
-
-        public void OnReturnedToTitle(object sender, ReturnedToTitleEventArgs e)
-        {
-            ApplyConfig(Nightshade.Config);
         }
 
         public void OnSaved(object sender, SavedEventArgs e)
@@ -366,13 +355,6 @@ namespace ichortower
             Game1.SetRenderTarget(savedTarget);
         }
 
-        public static void Game1_ShouldDrawOnBuffer_Postfix(
-                ref bool __result)
-        {
-            if (Game1.gameMode == Game1.playingGameMode) {
-                __result = true;
-            }
-        }
 
         public void OnButtonsChanged(object sender, ButtonsChangedEventArgs e)
         {

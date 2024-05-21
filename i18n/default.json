@@ -27,7 +27,7 @@
   "menu.ClearButton.Hover": "Clear^Reset all color sliders to zero.",
   "menu.CopyButton.Hover": "Copy^Copy the state of the color sliders.",
   "menu.PasteButton.Hover": "Paste^Paste the state of the color sliders.",
-  "menu.PreviewButton.Hover": "Preview^Hold this button down to show the starting state of this profile instead of the current state. Reverts to current state when released.",
+  "menu.PreviewButton.Hover": "Preview^When held, applies the initial state of the sliders instead of the current state. Does not affect checkboxes.",
 
   "menu.EnableDepthOfField.Text": "Depth of Field",
   "menu.EnableDepthOfField.Hover": "Blur the top and bottom of the screen to simulate parts of the image being out of focus.",
