@@ -93,14 +93,22 @@ namespace ichortower
                 else if (!GameStateQuery.CheckConditions(profile.Conditions)) {
                     continue;
                 }
+                // InitialMenuIndex is determined with priority shenanigans:
+                // world profile wins, followed by ui profile, followed by
+                // toy shader profile. but at title screen, the title screen
+                // profile wins.
+                // the config menu uses this value when it opens to select an
+                // initial profile tab.
                 if (!usingColorizeWorld && profile.ColorizeWorld) {
                     InitialMenuIndex = i;
                     usingColorizeWorld = true;
                     SetColorizerParameters(ref WorldColorizer, ref profile);
                 }
-                if (!usingColorizeUI && profile.ColorizeUI) {
+                if (!usingColorizeUI &&
+                        ((titleMode && profile.ColorizeTitleScreen) ||
+                         profile.ColorizeUI)) {
                     usingColorizeUI = true;
-                    if (!usingColorizeWorld) {
+                    if (titleMode || !usingColorizeWorld) {
                         InitialMenuIndex = i;
                     }
                     SetColorizerParameters(ref UIColorizer, ref profile);
