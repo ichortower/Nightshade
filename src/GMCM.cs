@@ -51,6 +51,7 @@ namespace ichortower
     {
         public bool mouseLastFrame = false;
         public string text = "";
+        public string sound = "drumkit6";
         public void Draw(SpriteBatch sb, Vector2 coords)
         {
             coords.Y -= 4;
@@ -65,8 +66,16 @@ namespace ichortower
             Rectangle bounds = new((int)coords.X, (int)coords.Y, Width, Height);
             bool hovering = bounds.Contains(mouseX, mouseY);
             if (hovering && justClicked) {
-                // open submenu
-                Nightshade.instance.Monitor.Log($"opening menu", LogLevel.Info);
+                ui.ShaderMenu m = new();
+                Game1.playSound(sound);
+                // when in game, remove GMCM so world is visible.
+                // at title menu, leave it open so UI is showing.
+                if (Game1.gameMode == Game1.playingGameMode) {
+                    Game1.activeClickableMenu = m;
+                }
+                else {
+                    Game1.activeClickableMenu.SetChildMenu(m);
+                }
             }
             Rectangle[] dests = ui.Widget.nineslice(bounds, 6, 6);
             ui.ButtonShared.drawFrame(hovering, sb, dests);
