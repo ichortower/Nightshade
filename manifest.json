@@ -6,6 +6,6 @@
 	"UniqueID": "ichortower.Nightshade",
 	"EntryDll": "Nightshade.dll",
 	"MinimumApiVersion": "3.0.0",
-	"UpdateKeys": ["Nexus:23742", "GitHub:ichortower/Nightshade"],
+	"UpdateKeys": ["Nexus:23742@legacy", "GitHub:ichortower/Nightshade"],
 	"Dependencies": []
 }
