@@ -246,7 +246,8 @@ namespace ichortower.ui
             }
             setSwitcherLabels();
             if (bySeasonToggle.Value) {
-                seasonSwitcher.FocusedIndex = Game1.seasonIndex;
+                seasonSwitcher.FocusedIndex = Utility.getSeasonNumber(
+                        Game1.GetSeasonForLocation(Game1.currentLocation));
             }
             else {
                 seasonSwitcher.FocusedIndex = Nightshade.Config.ColorizerActiveProfile;

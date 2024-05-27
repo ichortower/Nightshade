@@ -1,4 +1,5 @@
-GAME_DIR=${HOME}/GOG Games/Stardew Valley/game
+#GAME_DIR=${HOME}/GOG Games/Stardew Valley/game
+GAME_DIR=${HOME}/.steam/steam/steamapps/common/Stardew Valley
 MOD_DIR=${GAME_DIR}/Mods/Nightshade
 
 install: shaders

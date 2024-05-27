@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
-using StardewValley.Mods;
+//using StardewValley.Mods;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Enums;
@@ -77,7 +77,8 @@ namespace ichortower
         {
             int index = conf.ColorizerActiveProfile;
             if (conf.ColorizeBySeason) {
-                index = Game1.currentLocation?.GetSeasonIndex() ?? Game1.seasonIndex;
+                index = Utility.getSeasonNumber(Game1.GetSeasonForLocation(
+                        Game1.currentLocation));
             }
             ColorizerPreset active = conf.ColorizerProfiles[index];
             ColorShader.Parameters["Saturation"].SetValue(active.Saturation);
@@ -179,10 +180,14 @@ namespace ichortower
                     SamplerState.PointClamp);
             // get current render target. we need to restore it later, and
             // we need to read from and write back to it.
-            RenderTarget2D savedTarget = null;
-            RenderTargetBinding[] rt = Game1.graphics.GraphicsDevice.GetRenderTargets();
-            if (rt.Length > 0) {
-                savedTarget = rt[0].RenderTarget as RenderTarget2D;
+            // this hacky version is to make it work in 1.5.6, where the target
+            // doesn't seem to be set to the screen buffer during gameplay.
+            RenderTarget2D savedTarget = Game1.game1.screen;
+            if (Game1.game1.takingMapScreenshot) {
+                RenderTargetBinding[] rt = Game1.graphics.GraphicsDevice.GetRenderTargets();
+                if (rt.Length > 0) {
+                    savedTarget = rt[0].RenderTarget as RenderTarget2D;
+                }
             }
             EnsureBuffers(savedTarget);
 

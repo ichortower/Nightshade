@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<RootNamespace>ichortower.Nightshade</RootNamespace>
-		<Version>1.0.5</Version>
-		<TargetFramework>net6.0</TargetFramework>
+		<Version>1.0.5-legacy</Version>
+		<TargetFramework>net5.0</TargetFramework>
 		<Configuration>Release</Configuration>
 
 		<ModFolderName>Nightshade</ModFolderName>
+		<GamePath>$(HOME)/.steam/steam/steamapps/common/Stardew Valley</GamePath>
 		<EnableHarmony>true</EnableHarmony>
 		<EnableModZip>false</EnableModZip>
 	</PropertyGroup>
