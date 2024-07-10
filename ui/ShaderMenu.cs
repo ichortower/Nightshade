@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
 using System.Collections.Generic;
@@ -557,43 +558,36 @@ namespace ichortower.ui
 
         public void RevertCurrentProfile()
         {
-            /*
-            ref ColorizerProfile current = ref ColorizerActiveStates[profileSwitcher.FocusedIndex];
-            ColorizerProfile rev = ColorizerInitialStates[profileSwitcher.FocusedIndex];
-            current = rev.Clone();
-            LoadColorizerProfile(current);
+            NightshadeProfile current = ProfileActiveStates[profileSwitcher.FocusedIndex];
+            NightshadeProfile initial = ProfileInitialStates[profileSwitcher.FocusedIndex];
+            current.ColorSettings = initial.ColorSettings.Clone();
+            LoadColorizerProfile(current.ColorSettings);
             onChildChange(null);
-            */
         }
 
         public void ClearCurrentProfile()
         {
-            /*
-            ref ColorizerProfile current = ref ColorizerActiveStates[profileSwitcher.FocusedIndex];
-            current = new();
-            LoadColorizerProfile(current);
+            NightshadeProfile current = ProfileActiveStates[profileSwitcher.FocusedIndex];
+            current.ColorSettings = new();
+            LoadColorizerProfile(current.ColorSettings);
             onChildChange(null);
-            */
         }
 
         public void CopyCurrentProfile()
         {
-            /*
-            ColorizerProfile current = ColorizerActiveStates[profileSwitcher.FocusedIndex];
-            CopyPasteBuffer = current.Clone();
-            */
+            NightshadeProfile current = ProfileActiveStates[profileSwitcher.FocusedIndex];
+            CopyPasteBuffer = current.ColorSettings.Clone();
         }
 
         public void PasteCurrentProfile()
         {
-            /*
-            if (CopyPasteBuffer != null) {
-                ref ColorizerProfile current = ref ColorizerActiveStates[profileSwitcher.FocusedIndex];
-                current = CopyPasteBuffer.Clone();
-                LoadColorizerProfile(current);
-                onChildChange(null);
+            if (CopyPasteBuffer is null) {
+                return;
             }
-            */
+            NightshadeProfile current = ProfileActiveStates[profileSwitcher.FocusedIndex];
+            current.ColorSettings = CopyPasteBuffer.Clone();
+            LoadColorizerProfile(current.ColorSettings);
+            onChildChange(null);
         }
 
     }

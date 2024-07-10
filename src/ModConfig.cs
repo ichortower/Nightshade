@@ -25,6 +25,11 @@ namespace ichortower
         public int ColorizerActiveProfile { private get; set; } = 0;
         public DepthOfFieldProfile DepthOfFieldSettings { private get; set; } = new();
 
+        public ModConfig()
+        {
+            Format = CurrentFormat;
+        }
+
         /*
          *
          */
@@ -70,6 +75,7 @@ namespace ichortower
         public NightshadeProfile Clone() {
             NightshadeProfile other = (NightshadeProfile) this.MemberwiseClone();
             other.ColorSettings = ColorSettings.Clone();
+            other.DepthOfField = DepthOfField.Clone();
             return other;
         }
     }
@@ -101,6 +107,10 @@ namespace ichortower
     {
         public float Field = 0.6f;
         public float Intensity = 6.0f;
+
+        public DepthOfFieldProfile Clone() {
+            return (DepthOfFieldProfile) this.MemberwiseClone();
+        }
     }
 
     public enum LumaType {
