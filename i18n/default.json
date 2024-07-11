@@ -39,6 +39,8 @@
 
   "gmcm.MenuKeybind.name": "MenuKeybind",
   "gmcm.MenuKeybind.tooltip": "The keybinding to open the Nightshade menu.",
+  "gmcm.TabBarWheelScroll.name": "TabBarWheelScroll",
+  "gmcm.TabBarWheelScroll.tooltip": "When using the mouse wheel to change tabs in the profile switcher, set which direction to move when scrolling down: Right (next) or Left (previous).",
   "gmcm.OpenMenu.name": "Nightshade Menu",
   "gmcm.OpenMenu.tooltip": "Nightshade's own menu provides live preview of profile and slider settings.",
   "gmcm.OpenMenu.buttonText": "Open",

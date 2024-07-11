@@ -9,6 +9,7 @@ namespace ichortower
         public static string CurrentFormat = "1.1";
         public string Format = null;
         public KeybindList MenuKeybind = new(SButton.H);
+        public ScrollDirection TabBarWheelScroll = ScrollDirection.DownRight;
 
         public List<NightshadeProfile> Profiles = new();
 
@@ -111,6 +112,15 @@ namespace ichortower
         public DepthOfFieldProfile Clone() {
             return (DepthOfFieldProfile) this.MemberwiseClone();
         }
+    }
+
+    /*
+     * The -1 and 1 are important here, since they cause a direction reversal
+     * in ui/TabBar.cs
+     */
+    public enum ScrollDirection {
+        DownRight = -1,
+        DownLeft = 1
     }
 
     public enum LumaType {

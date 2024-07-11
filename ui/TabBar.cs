@@ -131,5 +131,15 @@ namespace ichortower.ui
                 start += dx;
             }
         }
+
+        public override void scrollWheel(int direction)
+        {
+            int prev = FocusedIndex;
+            int dir = (int)Nightshade.Config.TabBarWheelScroll;
+            FocusedIndex += Math.Sign(direction) * dir;
+            if (prev != FocusedIndex && parent is ShaderMenu m) {
+                m.onChildChange(this);
+            }
+        }
     }
 }
