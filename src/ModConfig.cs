@@ -36,6 +36,7 @@ namespace ichortower
          */
         public static ModConfig ApplyMigrations(ModConfig conf)
         {
+            // intentional hardcoded "1.1" instead of CurrentFormat
             if (conf.Format is null ||
                     new SemanticVersion(conf.Format).IsOlderThan("1.1")) {
                 foreach (var profile in conf.ColorizerProfiles) {

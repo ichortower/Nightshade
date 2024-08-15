@@ -221,7 +221,7 @@ namespace ichortower
 
         // attempting to run the shader after other mods do their OnRendered
         // drawing (GMCM, AT, FS...)
-        [EventPriority(EventPriority.Low - 10)]
+        [EventPriority(EventPriority.Low - 100)]
         public void OnRendered(object sender, RenderedEventArgs e)
         {
             if (!usingColorizeWorld && !usingColorizeUI) {
@@ -305,7 +305,7 @@ namespace ichortower
 
         // this is much like OnRendered, but it's for the depth-of-field
         // shader, which applies only to the world layer.
-        [EventPriority(EventPriority.Low - 10)]
+        [EventPriority(EventPriority.Low - 100)]
         public void OnRenderedWorld(object sender, RenderedWorldEventArgs e)
         {
             if (!usingDepthOfField) {
