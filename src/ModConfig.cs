@@ -29,6 +29,7 @@ namespace ichortower
         public ModConfig()
         {
             Format = CurrentFormat;
+            Profiles.Add(new NightshadeProfile());
         }
 
         /*
