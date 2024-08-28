@@ -1,5 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
 using System;
@@ -9,11 +11,15 @@ namespace ichortower.ui
     public class TabBar : Widget
     {
         public static string IndoorLabel = ":I:";
+        public static string AddLabel = "+";
         public static int GetTextWidth(string text) {
-            if (text.Equals(IndoorLabel)) {
-                return 34;
+            if (text.Equals(AddLabel)) {
+                return 24;
             }
             return (int)Game1.smallFont.MeasureString(text).X;
+        }
+        public static int TabWidth(string text) {
+            return GetTextWidth(text) + 7;
         }
 
         public string[] Labels;
@@ -50,6 +56,7 @@ namespace ichortower.ui
                     xoff += drawUnfocusedTab(b, Labels[i], xoff);
                 }
             }
+            xoff += drawUnfocusedTab(b, AddLabel, xoff);
             b.Draw(Game1.menuTexture, color: Color.White,
                     sourceRectangle: new Rectangle(12, 264, 36, 4),
                     destinationRectangle: new Rectangle(x+xoff-1, y+this.Bounds.Height-3, this.Bounds.Width-xoff+1, 2));
@@ -88,17 +95,22 @@ namespace ichortower.ui
             int textWidth = GetTextWidth(text);
             int x = (this.parent?.xPositionOnScreen ?? 0) + this.Bounds.X + xoff;
             int y = (this.parent?.yPositionOnScreen ?? 0) + this.Bounds.Y;
+            Rectangle hoverbox = new(x, y, textWidth+7, this.Bounds.Height);
+            bool hovering = hoverbox.Contains(Game1.getMouseX(), Game1.getMouseY());
 
             Color textAlpha = Game1.textColor;
-            textAlpha.A /= 2;
+            if (!hovering) {
+                textAlpha.A /= 2;
+            }
             if (useIcon) {
                 b.Draw(ShaderMenu.IconTexture, color: textAlpha,
                         sourceRectangle: new Rectangle(110, 0, 22, 22),
                         destinationRectangle: new Rectangle(x+10, y+10, 22, 22));
             }
             else {
+                int minioffset = text.Equals(TabBar.AddLabel) ? 8 : 4;
                 Utility.drawTextWithShadow(b, text, Game1.smallFont,
-                        new Vector2(x+4, y+6), textAlpha);
+                        new Vector2(x+minioffset, y+6), textAlpha);
             }
 
             b.Draw(Game1.menuTexture, color: Color.White,
@@ -119,16 +131,21 @@ namespace ichortower.ui
         public override void click(int x, int y, bool playSound = true)
         {
             int start = 20;
+            int dx = 0;
             for (int i = 0; i < Labels.Length; ++i) {
-                int dx = GetTextWidth(Labels[i]) + 7;
+                dx = TabWidth(Labels[i]);
                 if (x > start && x < start + dx) {
                     this.FocusedIndex = i;
                     if (this.parent is ShaderMenu m) {
                         m.onChildChange(this);
                     }
-                    break;
+                    return;
                 }
                 start += dx;
+            }
+            dx = TabWidth(AddLabel);
+            if (x > start && x < start + dx) {
+                Nightshade.instance.Monitor.Log("Adding new profile", LogLevel.Warn);
             }
         }
 
@@ -138,6 +155,20 @@ namespace ichortower.ui
             int dir = (int)Nightshade.Config.TabBarWheelScroll;
             FocusedIndex += Math.Sign(direction) * dir;
             if (prev != FocusedIndex && parent is ShaderMenu m) {
+                m.onChildChange(this);
+            }
+        }
+
+        public override void keyPress(Keys key)
+        {
+            int prev = this.FocusedIndex;
+            if (key == Keys.Right || Game1.options.doesInputListContain(Game1.options.moveRightButton, key)) {
+                this.FocusedIndex += 1;
+            }
+            else if (key == Keys.Left || Game1.options.doesInputListContain(Game1.options.moveLeftButton, key)) {
+                this.FocusedIndex -= 1;
+            }
+            if (prev != this.FocusedIndex && this.parent is ShaderMenu m) {
                 m.onChildChange(this);
             }
         }
