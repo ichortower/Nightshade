@@ -46,6 +46,9 @@ namespace ichortower.ui
         }
         public int DraggingOffset;
 
+        private int _aboutToDragIndex;
+        private int _aboutToDragX;
+
 
         public TabBar(Rectangle bounds, string[] labels, IClickableMenu parent)
             : base(parent, bounds)
@@ -168,14 +171,16 @@ namespace ichortower.ui
 
         public override void click(int x, int y, bool playSound = true)
         {
+            _aboutToDragIndex = -1;
             int start = 20;
             int dx = 0;
             for (int i = 0; i < Labels.Length; ++i) {
                 dx = TabWidth(Labels[i]);
                 if (x > start && x < start + dx) {
-                    this.FocusedIndex = i;
-                    this.DraggingIndex = i;
-                    this.DraggingOffset = x - start;
+                    FocusedIndex = i;
+                    _aboutToDragIndex = i;
+                    _aboutToDragX = x;
+                    DraggingOffset = x - start;
                     if (this.parent is ShaderMenu m) {
                         m.onChildChange(this);
                     }
@@ -189,9 +194,39 @@ namespace ichortower.ui
             }
         }
 
+        public override void clickHold(int x, int y)
+        {
+            if (DraggingIndex >= 0 || _aboutToDragIndex < 0) {
+                return;
+            }
+            if (Math.Abs(_aboutToDragX - x) > 8) {
+                DraggingIndex = _aboutToDragIndex;
+            }
+        }
+
         public override void clickRelease(int x, int y, bool playSound = true)
         {
-            this.DraggingIndex = -1;
+            if (DraggingIndex < 0) {
+                return;
+            }
+            int startIndex = DraggingIndex;
+            int dropIndex = startIndex;
+            int dropx = x - DraggingOffset - (this.parent?.xPositionOnScreen ?? 0);
+            int start = 20;
+            int dx = 0;
+            for (int i = 0; i < Labels.Length; ++i) {
+                dx = TabWidth(Labels[i]);
+                if (x < start + dx) {
+                    dropIndex = i;
+                    break;
+                }
+                start += dx;
+            }
+            DraggingIndex = -1;
+            if (startIndex == dropIndex) {
+                return;
+            }
+            Nightshade.instance.Monitor.Log($"releasing drag {startIndex} -> {dropIndex}", LogLevel.Warn);
         }
 
         public override void scrollWheel(int direction)
