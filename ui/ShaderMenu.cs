@@ -397,7 +397,8 @@ namespace ichortower.ui
                 if (child.Bounds.Contains(modx, mody)) {
                     child.InActiveState = true;
                     child.click(modx, mody, playSound);
-                    if (child is Slider || child.Name == "PreviewButton") {
+                    if (child is Slider || child is TabBar ||
+                            child.Name == "PreviewButton") {
                         this.heldChild = child;
                     }
                     this.keyedChild = child;

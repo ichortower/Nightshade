@@ -5,6 +5,7 @@ using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
 using System;
+using System.Linq;
 
 namespace ichortower.ui
 {
@@ -34,10 +35,24 @@ namespace ichortower.ui
             }
         }
 
+        private int _draggingIndex;
+        public int DraggingIndex {
+            get {
+                return _draggingIndex;
+            }
+            set {
+                _draggingIndex = Math.Max(-1, Math.Min(value, Labels.Length-1));
+            }
+        }
+        public int DraggingOffset;
+
+
         public TabBar(Rectangle bounds, string[] labels, IClickableMenu parent)
             : base(parent, bounds)
         {
             this.Labels = labels;
+            this.FocusedIndex = 0;
+            this.DraggingIndex = -1;
         }
 
         public override void draw(SpriteBatch b)
@@ -48,18 +63,41 @@ namespace ichortower.ui
                     sourceRectangle: new Rectangle(12, 264, 36, 4),
                     destinationRectangle: new Rectangle(x, y+this.Bounds.Height-3, 21, 2));
             int xoff = 20;
+            int[] widths = Labels.Select(l => TabWidth(l)).ToArray();
+            int dragposition = 0;
+            int dragwidth = 0;
+            if (DraggingIndex >= 0) {
+                dragposition = Game1.getMouseX() - DraggingOffset -
+                        (this.parent?.xPositionOnScreen ?? 0);
+                dragwidth = widths[DraggingIndex];
+            }
             for (int i = 0; i < Labels.Length; ++i) {
-                if (i == FocusedIndex) {
-                    xoff += drawFocusedTab(b, Labels[i], xoff);
+                if (i == DraggingIndex) {
+                    continue;
                 }
-                else {
-                    xoff += drawUnfocusedTab(b, Labels[i], xoff);
+                int drawpos = xoff;
+                if (DraggingIndex >= 0 && xoff + widths[i] > dragposition + dragwidth/2) {
+                    drawpos += dragwidth;
                 }
+                drawTab(b, Labels[i], drawpos, i == FocusedIndex);
+                xoff += widths[i];
+            }
+            if (DraggingIndex >= 0) {
+                drawTab(b, Labels[DraggingIndex], dragposition, DraggingIndex == FocusedIndex);
+                xoff += dragwidth;
             }
             xoff += drawUnfocusedTab(b, AddLabel, xoff);
             b.Draw(Game1.menuTexture, color: Color.White,
                     sourceRectangle: new Rectangle(12, 264, 36, 4),
                     destinationRectangle: new Rectangle(x+xoff-1, y+this.Bounds.Height-3, this.Bounds.Width-xoff+1, 2));
+        }
+
+        public int drawTab(SpriteBatch b, string text, int xoff, bool focused)
+        {
+            if (focused) {
+                return drawFocusedTab(b, text, xoff);
+            }
+            return drawUnfocusedTab(b, text, xoff);
         }
 
         public int drawFocusedTab(SpriteBatch b, string text, int xoff)
@@ -136,6 +174,8 @@ namespace ichortower.ui
                 dx = TabWidth(Labels[i]);
                 if (x > start && x < start + dx) {
                     this.FocusedIndex = i;
+                    this.DraggingIndex = i;
+                    this.DraggingOffset = x - start;
                     if (this.parent is ShaderMenu m) {
                         m.onChildChange(this);
                     }
@@ -147,6 +187,11 @@ namespace ichortower.ui
             if (x > start && x < start + dx) {
                 Nightshade.instance.Monitor.Log("Adding new profile", LogLevel.Warn);
             }
+        }
+
+        public override void clickRelease(int x, int y, bool playSound = true)
+        {
+            this.DraggingIndex = -1;
         }
 
         public override void scrollWheel(int direction)
